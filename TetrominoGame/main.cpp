@@ -1,0 +1,28 @@
+//
+//  main.cpp
+//  TetrominoGame
+//
+//  Created by John Geiger on 10/1/21.
+//
+
+#include <iostream>
+#include "TetrominoApp.hpp"
+
+int main(int argc, const char * argv[])
+{
+    TetrominoApp* pTetrominoApp(new TetrominoApp(SCREEN_HEIGHT));
+    
+    if (!pTetrominoApp->InitGame())
+    {
+        printf("Game Initialization failed.");
+        return -1;
+    }
+    
+    pTetrominoApp->MainLoop();
+    
+    delete(pTetrominoApp);
+    pTetrominoApp = NULL;
+    
+    printf("Game over in Main");
+    return 0;
+}
