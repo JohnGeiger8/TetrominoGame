@@ -27,15 +27,12 @@ public:
     void Update();
     void Shutdown();
     
-    void DrawPiece(int x, int y, Tetromino tetromino, Rotation rotation);
     void DrawRectangle(int xPositionPixels, int yPositionPixels, int width, int height, SDL_Color color, bool isFilled=true);
     void Render();
     
 private:
     SDL_Renderer* m_pRenderer;
     std::shared_ptr<TetrominoBoard> m_pBoard;
-    
-    void DrawBoard();
 };
 
 

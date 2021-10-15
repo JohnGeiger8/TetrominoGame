@@ -157,8 +157,8 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
             
             m_pGameView->Update();
             DrawBoard();
-            m_pGameView->DrawPiece(mXPosition, mYPosition, mTetromino, mRotation);
-            m_pGameView->DrawPiece(mNextXPosition, mNextYPosition, mNextTetromino, mNextRotation);
+            DrawPiece(mXPosition, mYPosition, mTetromino, mRotation);
+            DrawPiece(mNextXPosition, mNextYPosition, mNextTetromino, mNextRotation);
             m_pGameView->Render();
             
             m_pTetrominoMovementTimer->Start();
@@ -194,8 +194,8 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
             }
             m_pGameView->Update();
             DrawBoard();
-            m_pGameView->DrawPiece(mXPosition, mYPosition, mTetromino, mRotation);
-            m_pGameView->DrawPiece(mNextXPosition, mNextYPosition, mNextTetromino, mNextRotation);
+            DrawPiece(mXPosition, mYPosition, mTetromino, mRotation);
+            DrawPiece(mNextXPosition, mNextYPosition, mNextTetromino, mNextRotation);
             m_pGameView->Render();
         }
     }
@@ -244,6 +244,28 @@ void TetrominoLogic::DrawBoard()
                 int xPositionPixels = m_pBoard->GetXPositionInPixels(i);
                 int yPositionPixels = m_pBoard->GetYPositionInPixels(j);
                 m_pGameView->DrawRectangle(xPositionPixels + 1, yPositionPixels + 1, BLOCK_SIZE - 1, BLOCK_SIZE - 1, Tetrominos::GetTetrominoColor(m_pBoard->GetBlockType(i, j)));
+            }
+        }
+    }
+}
+
+//
+// Draws the given piece at the given position
+//
+// Input: `x` and `y` represent the position the piece is being drawn to.
+//        `tetromino` and `rotation` represent the piece we're drawing.
+//
+void TetrominoLogic::DrawPiece(int x, int y, Tetromino tetromino, Rotation rotation)
+{
+    for (int boardX = x, tetrominoX = 0; boardX < x + PIECE_BLOCKS; boardX++, tetrominoX++)
+    {
+        for (int boardY = y, tetrominoY = 0; boardY < y + PIECE_BLOCKS; boardY++, tetrominoY++)
+        {
+            if (Tetrominos::GetBlockType(tetromino, rotation, tetrominoY, tetrominoX) != 0)
+            {
+                int xPositionPixels = m_pBoard->GetXPositionInPixels(boardX);
+                int yPositionPixels = m_pBoard->GetYPositionInPixels(boardY);
+                m_pGameView->DrawRectangle(xPositionPixels + 1, yPositionPixels + 1, BLOCK_SIZE - 1, BLOCK_SIZE - 1, Tetrominos::GetTetrominoColor(tetromino));
             }
         }
     }

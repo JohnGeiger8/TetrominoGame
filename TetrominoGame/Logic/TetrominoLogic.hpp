@@ -38,6 +38,7 @@ public:
 private:
     int GetRandomNumber(int pA, int pB);
     void DrawBoard();
+    void DrawPiece(int x, int y, Tetromino tetromino, Rotation rotation);
 
     std::shared_ptr<TetrominoBoard> m_pBoard;
     std::shared_ptr<TetrominoView> m_pGameView;
