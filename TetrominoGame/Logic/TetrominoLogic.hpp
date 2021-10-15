@@ -37,6 +37,7 @@ public:
 
 private:
     int GetRandomNumber(int pA, int pB);
+    void DrawBoard();
 
     std::shared_ptr<TetrominoBoard> m_pBoard;
     std::shared_ptr<TetrominoView> m_pGameView;

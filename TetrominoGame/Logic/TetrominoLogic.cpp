@@ -156,6 +156,7 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
             }
             
             m_pGameView->Update();
+            DrawBoard();
             m_pGameView->DrawPiece(mXPosition, mYPosition, mTetromino, mRotation);
             m_pGameView->DrawPiece(mNextXPosition, mNextYPosition, mNextTetromino, mNextRotation);
             m_pGameView->Render();
@@ -192,6 +193,7 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
                 mGameCycleTimer->Start();
             }
             m_pGameView->Update();
+            DrawBoard();
             m_pGameView->DrawPiece(mXPosition, mYPosition, mTetromino, mRotation);
             m_pGameView->DrawPiece(mNextXPosition, mNextYPosition, mNextTetromino, mNextRotation);
             m_pGameView->Render();
@@ -215,6 +217,36 @@ void TetrominoLogic::CreateNewTetromino()
     // Next tetromino
     mNextTetromino = GetRandomNumber(0, 6);
     mNextRotation = GetRandomNumber(0, 3);
+}
+
+//
+// Draws the board
+//
+void TetrominoLogic::DrawBoard()
+{
+    // Calculate the limits of the board in pixels
+    int leftBorderX = BOARD_POSITION - (BLOCK_SIZE * (BOARD_WIDTH / 2)) - 1;
+    int rightBorderX = BOARD_POSITION + (BLOCK_SIZE * (BOARD_WIDTH / 2));
+    int borderY = SCREEN_HEIGHT - (BLOCK_SIZE * BOARD_HEIGHT);
+
+    // Rectangles that delimit the board
+    SDL_Color blue = {0x00, 0x00, 0xFF, 0xFF};
+    m_pGameView->DrawRectangle(leftBorderX - BOARD_LINE_WIDTH, borderY, BOARD_LINE_WIDTH, SCREEN_HEIGHT - 1, blue);
+    m_pGameView->DrawRectangle(rightBorderX, borderY, BOARD_LINE_WIDTH, SCREEN_HEIGHT - 1, blue);
+
+    // Draw blocks stored in board
+    for (int i = 0; i < BOARD_WIDTH; ++i)
+    {
+        for (int j = 0; j < BOARD_HEIGHT; ++j)
+        {
+            if (!m_pBoard->IsBlockFree(i, j))
+            {
+                int xPositionPixels = m_pBoard->GetXPositionInPixels(i);
+                int yPositionPixels = m_pBoard->GetYPositionInPixels(j);
+                m_pGameView->DrawRectangle(xPositionPixels + 1, yPositionPixels + 1, BLOCK_SIZE - 1, BLOCK_SIZE - 1, Tetrominos::GetTetrominoColor(m_pBoard->GetBlockType(i, j)));
+            }
+        }
+    }
 }
 
 //

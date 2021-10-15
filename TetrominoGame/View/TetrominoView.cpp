@@ -62,8 +62,6 @@ void TetrominoView::Update()
     // Clear screen
     SDL_SetRenderDrawColor(m_pRenderer, 0x00, 0x00, 0x00, 0x00);
     SDL_RenderClear(m_pRenderer);
-    
-    DrawBoard();
 }
 
 //
