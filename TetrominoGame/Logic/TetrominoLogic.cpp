@@ -17,11 +17,14 @@ TetrominoLogic::TetrominoLogic(int screenHeight)
     m_pBoard = NULL;
     m_pGameView = NULL;
     mGameCycleTimer = NULL;
+    m_pGameSessionTimer = NULL;
+    m_pTetrominoMovementTimer = NULL;
     
     mScreenHeight = screenHeight;
     mIsPaused = false;
     mIsGameOver = false;
     mDropTime = PIECE_DROP_START_TIME;
+    mDifficultyLevel = 1;
     
     mXPosition = 0; mYPosition = 0;
     mNextXPosition = 0; mNextYPosition = 0;
@@ -67,6 +70,10 @@ bool TetrominoLogic::Init(SDL_Window* pWindow)
         return false;
     }
     
+    // Initialize each timer
+    m_pGameSessionTimer = std::make_shared<Timer>();
+    m_pGameSessionTimer->Start();
+    
     mGameCycleTimer = std::make_shared<Timer>();
     mGameCycleTimer->Start();
     
@@ -81,9 +88,10 @@ bool TetrominoLogic::Init(SDL_Window* pWindow)
 void TetrominoLogic::Shutdown()
 {
     m_pGameView->Shutdown();
-//    delete(mGameCycleTimer);
-//    mGameCycleTimer = NULL;
     mIsGameOver = true;
+    m_pGameSessionTimer->Stop();
+    m_pTetrominoMovementTimer->Stop();
+    mGameCycleTimer->Stop();
 }
 
 //
@@ -154,12 +162,7 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
                     mIsPaused = true;
                 }
             }
-            
-            m_pGameView->Update();
-            DrawBoard();
-            DrawPiece(mXPosition, mYPosition, mTetromino, mRotation);
-            DrawPiece(mNextXPosition, mNextYPosition, mNextTetromino, mNextRotation);
-            m_pGameView->Render();
+            OnRender();
             
             m_pTetrominoMovementTimer->Start();
             
@@ -192,13 +195,28 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
                 CreateNewTetromino();
                 mGameCycleTimer->Start();
             }
-            m_pGameView->Update();
-            DrawBoard();
-            DrawPiece(mXPosition, mYPosition, mTetromino, mRotation);
-            DrawPiece(mNextXPosition, mNextYPosition, mNextTetromino, mNextRotation);
-            m_pGameView->Render();
+            OnRender();
         }
     }
+    
+    // Increase difficulty
+    if (mDifficultyLevel < 10 && (m_pGameSessionTimer->GetTicks() > DIFFICULTY_SPIKE_TIME * mDifficultyLevel))
+    {
+        mDifficultyLevel++;
+        mDropTime -= 50;
+    }
+}
+
+//
+// Does all of the rendering work
+//
+void TetrominoLogic::OnRender()
+{
+    m_pGameView->Update();
+    DrawBoard();
+    DrawPiece(mXPosition, mYPosition, mTetromino, mRotation);
+    DrawPiece(mNextXPosition, mNextYPosition, mNextTetromino, mNextRotation);
+    m_pGameView->Render();
 }
 
 //

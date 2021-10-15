@@ -15,8 +15,9 @@
 #include "TetrominoView.hpp"
 #include "Timer.hpp"
 
-#define PIECE_MOVE_TIME 200 // Time until movement events should be run again
+#define PIECE_MOVE_TIME 150 // Time until movement events should be run again
 #define PIECE_DROP_START_TIME 700 // Time until piece drops a block
+#define DIFFICULTY_SPIKE_TIME 15000 // Increase difficulty every 15 seconds
 
 
 //
@@ -30,6 +31,7 @@ public:
     bool Init(SDL_Window* pWindow);
     void Shutdown();
     void OnUpdate(SDL_Event* event);
+    void OnRender(); // Can/should this be private
     
     bool IsGameOver() { return mIsGameOver; };
 
@@ -47,12 +49,15 @@ private:
     bool mIsPaused;
     bool mIsGameOver;
     int mDropTime; // Time between each piece dropping
+    int mDifficultyLevel;
+    
     int mXPosition, mYPosition; // Position of the piece that is falling down
     int mNextXPosition, mNextYPosition; // Position of the next piece
     Tetromino mTetromino; // Type of piece that is falling down
     Rotation mRotation; // Rotation of the piece that is falling down
     Tetromino mNextTetromino; // Type of the next piece
     Rotation mNextRotation; // Rotation of the next piece
+    std::shared_ptr<Timer> m_pGameSessionTimer; // Timer tracking how long the user has been playing session
     std::shared_ptr<Timer> mGameCycleTimer; // Timer tracking Tetromino drop cycle
     std::shared_ptr<Timer> m_pTetrominoMovementTimer; // Timer tracking how long since the user's piece moved
 };
