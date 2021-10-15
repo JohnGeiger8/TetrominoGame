@@ -27,7 +27,7 @@ class TetrominoLogic
 public:
     TetrominoLogic(int screenHeight);
     
-    bool Init();
+    bool Init(SDL_Window* pWindow);
     void Shutdown();
     void OnUpdate(SDL_Event* event);
     

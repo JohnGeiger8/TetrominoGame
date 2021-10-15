@@ -9,7 +9,6 @@
 
 TetrominoView::TetrominoView()
 {
-    m_pWindow = NULL;
     m_pRenderer = NULL;
     m_pBoard = NULL;
 }
@@ -21,28 +20,19 @@ TetrominoView::TetrominoView()
 //
 // Returns: true if successful.
 //
-bool TetrominoView::Init(std::shared_ptr<TetrominoBoard> pBoard)
+bool TetrominoView::Init(std::shared_ptr<TetrominoBoard> pBoard, SDL_Window* pWindow)
 {
     bool success = true;
     
-    m_pWindow = SDL_CreateWindow("Tetrominos Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
-    if (m_pWindow == NULL)
+    m_pRenderer = SDL_CreateRenderer(pWindow, -1, SDL_RENDERER_ACCELERATED);
+    if(m_pRenderer == NULL)
     {
-        printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
+        printf( "Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
         success = false;
     }
     else
     {
-        m_pRenderer = SDL_CreateRenderer(m_pWindow, -1, SDL_RENDERER_ACCELERATED);
-        if(m_pRenderer == NULL)
-        {
-            printf( "Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
-            success = false;
-        }
-        else
-        {
-            SDL_SetRenderDrawColor( m_pRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
-        }
+        SDL_SetRenderDrawColor( m_pRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
     }
     
     m_pBoard = pBoard;
@@ -61,9 +51,7 @@ bool TetrominoView::Init(std::shared_ptr<TetrominoBoard> pBoard)
 void TetrominoView::Shutdown()
 {
     SDL_DestroyRenderer(m_pRenderer);
-    SDL_DestroyWindow(m_pWindow);
     m_pRenderer = NULL;
-    m_pWindow = NULL;
 }
 
 //

@@ -16,14 +16,14 @@
 #define SCREEN_WIDTH 600
 
 //
-// Handles the renderer and window for the application
+// Handles the rendering and drawing for the application
 //
 class TetrominoView
 {
 public:
     TetrominoView();
     
-    bool Init(std::shared_ptr<TetrominoBoard> pBoard);
+    bool Init(std::shared_ptr<TetrominoBoard> pBoard, SDL_Window* pWindow);
     void Update();
     void Shutdown();
     
@@ -31,7 +31,6 @@ public:
     void Render();
     
 private:
-    SDL_Window* m_pWindow;
     SDL_Renderer* m_pRenderer;
     std::shared_ptr<TetrominoBoard> m_pBoard;
     
