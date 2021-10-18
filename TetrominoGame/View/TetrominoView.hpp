@@ -10,7 +10,9 @@
 #define TetrominoView_hpp
 
 #include <SDL2/SDL.h>
+#include <SDL2_ttf/SDL_ttf.h>
 #include "TetrominoBoard.hpp"
+#include <string>
 
 #define SCREEN_HEIGHT 600
 #define SCREEN_WIDTH 600
@@ -28,9 +30,11 @@ public:
     void Shutdown();
     
     void DrawRectangle(int xPositionPixels, int yPositionPixels, int width, int height, SDL_Color color, bool isFilled=true);
+    void DrawText(std::string text, SDL_Rect* renderRectangle, SDL_Color color);
     void Render();
     
 private:
+    TTF_Font* m_pFont;
     SDL_Renderer* m_pRenderer;
     std::shared_ptr<TetrominoBoard> m_pBoard;
 };
