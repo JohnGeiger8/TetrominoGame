@@ -126,23 +126,16 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
             }
             else if (keyStates[SDL_SCANCODE_X])
             {
+                // Move piece straight down
                 while (m_pBoard->IsPossibleMovement(mXPosition, mYPosition + 1, mTetromino, mRotation))
                 {
                     mYPosition++;
                 }
                 
-                m_pBoard->StoreTetromino(mXPosition, mYPosition, mTetromino, mRotation);
-                
-                m_pBoard->DeletePossibleLines();
-                
-                if (m_pBoard->IsGameOver())
-                {
-                    Shutdown();
-                }
-                else
-                {
-                    CreateNewTetromino();
-                }
+                // Restart game cycle to give user a chance to move piece sideways
+                mGameCycleTimer->Start(); // FIXME: bug: user can spam x to avoid timer restarting
+                OnRender();
+                return;
             }
             else if (keyStates[SDL_SCANCODE_Z])
             {

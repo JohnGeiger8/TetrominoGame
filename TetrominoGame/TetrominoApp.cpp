@@ -22,6 +22,8 @@ TetrominoApp::~TetrominoApp()
     
     SDL_DestroyWindow(m_pWindow);
     m_pWindow = NULL;
+    
+    SDL_Quit();
 }
 
 //
