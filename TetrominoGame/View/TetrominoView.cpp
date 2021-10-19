@@ -127,35 +127,33 @@ void TetrominoView::DrawText(std::string text, SDL_Rect* renderRectangle, SDL_Co
     SDL_Surface* textSurface = TTF_RenderText_Blended(pFont, text.c_str(), textColor);
     if (textSurface == NULL)
     {
-        printf( "Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError() );
+        printf("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
+        return;
+    }
+    //Color key image
+    SDL_SetColorKey(textSurface, SDL_TRUE, SDL_MapRGB(textSurface->format, 0xFF, 0xFF, 0xFF));
+
+    //Create texture from surface pixels
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(m_pRenderer, textSurface);
+    if (texture == NULL)
+    {
+        printf("Unable to create texture from %s! SDL Error: %s\n", text.c_str(), SDL_GetError());
     }
     else
     {
-        //Color key image
-        SDL_SetColorKey(textSurface, SDL_TRUE, SDL_MapRGB(textSurface->format, 0xFF, 0xFF, 0xFF));
-
-        //Create texture from surface pixels
-        SDL_Texture* texture = SDL_CreateTextureFromSurface(m_pRenderer, textSurface);
-        if(texture == NULL)
-        {
-            printf("Unable to create texture from %s! SDL Error: %s\n", text.c_str(), SDL_GetError());
-        }
-        else
-        {
-            w = textSurface->w;
-            h = textSurface->h;
-            SDL_Rect srcRect = { 0, 0, w, h };
-            
-            renderRectangle->h = h;
-            renderRectangle->w = w;
-            renderRectangle->x -= w/2; // Convert center to top left
-            
-            SDL_RenderCopy(m_pRenderer, texture, &srcRect, renderRectangle);
-        }
-
-        // Get rid of old loaded surface
-        SDL_FreeSurface(textSurface);
+        w = textSurface->w;
+        h = textSurface->h;
+        SDL_Rect srcRect = { 0, 0, w, h };
+        
+        renderRectangle->h = h;
+        renderRectangle->w = w;
+        renderRectangle->x -= w/2; // Convert center to top left
+        
+        SDL_RenderCopy(m_pRenderer, texture, &srcRect, renderRectangle);
     }
+
+    // Get rid of old loaded surface
+    SDL_FreeSurface(textSurface);
 }
 
 //
