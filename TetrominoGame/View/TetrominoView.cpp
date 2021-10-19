@@ -66,6 +66,7 @@ void TetrominoView::Shutdown()
     {
         TTF_CloseFont(*it);
     }
+    m_pFonts.clear();
     
     TTF_Quit();
 }
