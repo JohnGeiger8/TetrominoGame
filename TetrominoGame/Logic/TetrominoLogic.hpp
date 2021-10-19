@@ -17,8 +17,6 @@
 
 #define PIECE_MOVE_TIME 150 // Time until movement events should be run again
 #define PIECE_DROP_START_TIME 700 // Time until piece drops a block
-#define DIFFICULTY_SPIKE_TIME 15000 // Increase difficulty every 15 seconds
-
 
 //
 // Handles all the game logic
@@ -39,17 +37,22 @@ public:
 
 private:
     int GetRandomNumber(int pA, int pB);
+    void StoreTetrominoAndReset();
+    void UpdateScore(int numberDeletedLines);
     void DrawBoard();
     void DrawPiece(int x, int y, Tetromino tetromino, Rotation rotation);
 
     std::shared_ptr<TetrominoBoard> m_pBoard;
     std::shared_ptr<TetrominoView> m_pGameView;
-    
-    int mScreenHeight;
+        
     bool mIsPaused;
     bool mIsGameOver;
+    
+    int mScreenHeight;
     int mDropTime; // Time between each piece dropping
-    int mDifficultyLevel;
+    int mPlayerLevel;
+    int mTotalNumberLinesDeleted;
+    int mPlayerScore;
     
     int mXPosition, mYPosition; // Position of the piece that is falling down
     int mNextXPosition, mNextYPosition; // Position of the next piece

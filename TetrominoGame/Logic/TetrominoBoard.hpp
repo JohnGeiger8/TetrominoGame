@@ -42,7 +42,7 @@ public:
     void StoreTetromino(int x, int y, Tetromino tetromino, Rotation rotation);
     const int GetBlockType(int x, int y);
     
-    void DeletePossibleLines();
+    int DeletePossibleLines();
     bool IsGameOver();
     
 private:

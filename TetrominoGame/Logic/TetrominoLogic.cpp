@@ -20,11 +20,13 @@ TetrominoLogic::TetrominoLogic(int screenHeight)
     m_pGameSessionTimer = NULL;
     m_pTetrominoMovementTimer = NULL;
     
-    mScreenHeight = screenHeight;
     mIsPaused = false;
     mIsGameOver = false;
+    
+    mScreenHeight = screenHeight;
     mDropTime = PIECE_DROP_START_TIME;
-    mDifficultyLevel = 1;
+    mPlayerLevel = 1;
+    mPlayerScore = 0;
     
     mXPosition = 0; mYPosition = 0;
     mNextXPosition = 0; mNextYPosition = 0;
@@ -175,28 +177,10 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
             }
             else
             {
-                m_pBoard->StoreTetromino(mXPosition, mYPosition, mTetromino, mRotation);
-                
-                m_pBoard->DeletePossibleLines();
-                
-                if (m_pBoard->IsGameOver())
-                {
-                    Shutdown();
-                    return;
-                }
-                
-                CreateNewTetromino();
-                mGameCycleTimer->Start();
+                StoreTetrominoAndReset();
             }
             OnRender();
         }
-    }
-    
-    // Increase difficulty
-    if (mDifficultyLevel < 10 && (m_pGameSessionTimer->GetTicks() > DIFFICULTY_SPIKE_TIME * mDifficultyLevel))
-    {
-        mDifficultyLevel++;
-        mDropTime -= 50;
     }
 }
 
@@ -214,6 +198,61 @@ void TetrominoLogic::OnRender()
     DrawPiece(mNextXPosition, mNextYPosition, mNextTetromino, mNextRotation);
     m_pGameView->DrawText("Super Fun Game", &textRectangle, textColor);
     m_pGameView->Render();
+}
+
+//
+// Stores the current piece and begins a new game cycle
+//
+void TetrominoLogic::StoreTetrominoAndReset()
+{
+    m_pBoard->StoreTetromino(mXPosition, mYPosition, mTetromino, mRotation);
+    
+    UpdateScore(m_pBoard->DeletePossibleLines());
+    
+    if (m_pBoard->IsGameOver())
+    {
+        Shutdown();
+        return;
+    }
+    
+    CreateNewTetromino();
+    mGameCycleTimer->Start();
+}
+
+//
+// Updates the player's score
+//
+// Input: `numberDeletedLines` is the number of lines the user eliminated on their last move.
+//        This determines how many points they receive.
+//
+void TetrominoLogic::UpdateScore(int numberDeletedLines)
+{
+    switch (numberDeletedLines)
+    {
+        case 0:
+            return;
+        case 1:
+            mPlayerScore += mPlayerLevel * 40;
+            break;
+        case 2:
+            mPlayerScore += mPlayerLevel * 100;
+            break;
+        case 3:
+            mPlayerScore += mPlayerLevel * 300;
+            break;
+        case 4:
+            mPlayerScore += mPlayerLevel * 1200;
+            break;
+    }
+    
+    mTotalNumberLinesDeleted += numberDeletedLines;
+    
+    // Increase difficulty every 10 line deletions
+    if (mTotalNumberLinesDeleted / mPlayerLevel >= 10)
+    {
+        mPlayerLevel++;
+        mDropTime -= 50;
+    }
 }
 
 //

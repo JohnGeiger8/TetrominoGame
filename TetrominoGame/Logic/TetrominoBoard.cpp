@@ -136,8 +136,11 @@ void TetrominoBoard::DeleteLine(int y)
 //
 // Deletes any lines that need deleting
 //
-void TetrominoBoard::DeletePossibleLines()
+// Returns: number of lines deleted.
+int TetrominoBoard::DeletePossibleLines()
 {
+    int numberDeletedLines = 0;
+    
     for (int j = 0; j < BOARD_HEIGHT; ++j)
     {
         bool deleteRow = true;
@@ -153,8 +156,10 @@ void TetrominoBoard::DeletePossibleLines()
         if (deleteRow == true)
         {
             DeleteLine(j);
+            ++numberDeletedLines;
         }
     }
+    return numberDeletedLines;
 }
 
 //
