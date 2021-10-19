@@ -11,7 +11,7 @@ TetrominoView::TetrominoView()
 {
     m_pRenderer = NULL;
     m_pBoard = NULL;
-    m_pFont = NULL;
+    m_pFonts = std::vector<TTF_Font*>();
 }
 
 //
@@ -49,12 +49,7 @@ bool TetrominoView::Init(std::shared_ptr<TetrominoBoard> pBoard, SDL_Window* pWi
         success = false;
     }
     
-    m_pFont = TTF_OpenFont("Assets/PTC55F.ttf", 55);
-    if (m_pFont == NULL)
-    {
-        printf("Failed to load font! SDL_ttf Error: %s\n", TTF_GetError());
-        success = false;
-    }
+    mDefaultFontPath = "Assets/PTC55F.ttf";
 
     return success;
 }
@@ -67,8 +62,11 @@ void TetrominoView::Shutdown()
     SDL_DestroyRenderer(m_pRenderer);
     m_pRenderer = NULL;
     
-    TTF_CloseFont(m_pFont);
-    m_pFont = NULL;
+    for (auto it = m_pFonts.begin(); it < m_pFonts.end(); ++it)
+    {
+        TTF_CloseFont(*it);
+    }
+    
     TTF_Quit();
 }
 
@@ -101,12 +99,32 @@ void TetrominoView::DrawRectangle(int xPositionPixels, int yPositionPixels, int 
 // Draws text
 //
 // Input: `text` is the string to be drawn.
+//        `renderRectangle` is the center of where the text should be.
+//        `textColor` is the color of the text to be drawn.
+//        `fontSize` is the font size of the text.
+//        `fontPath` is the path to the font to be used for drawing.
+//        The final three parameters are optional.
 //
-void TetrominoView::DrawText(std::string text, SDL_Rect* renderRectangle, SDL_Color textColor)
+void TetrominoView::DrawText(std::string text, SDL_Rect* renderRectangle, SDL_Color textColor, int fontSize, std::string fontPath)
 {
     int w, h;
+    TTF_Font* pFont;
     
-    SDL_Surface* textSurface = TTF_RenderText_Blended(m_pFont, text.c_str(), textColor);
+    // Open the font if given
+    if (fontPath == "")
+        pFont = TTF_OpenFont(mDefaultFontPath.c_str(), fontSize);
+    else
+        pFont = TTF_OpenFont(fontPath.c_str(), fontSize);
+    
+    if (pFont == NULL)
+    {
+        printf("Failed to load font! SDL_ttf Error: %s\n", TTF_GetError());
+        return;
+    }
+    
+    m_pFonts.push_back(pFont);
+    
+    SDL_Surface* textSurface = TTF_RenderText_Blended(pFont, text.c_str(), textColor);
     if (textSurface == NULL)
     {
         printf( "Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError() );

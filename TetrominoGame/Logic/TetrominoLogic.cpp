@@ -189,14 +189,16 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
 //
 void TetrominoLogic::OnRender()
 {
-    SDL_Rect textRectangle = { SCREEN_WIDTH / 2, 10, 100, 100 };
+    SDL_Rect titleRectangle = { SCREEN_WIDTH / 2, 10, 100, 100 };
+    SDL_Rect scoreRectangle = { SCREEN_WIDTH / 2, 120, 100, 100 };
     SDL_Color textColor = { 0x00, 0x00, 0xFF, 0xFF };
     
     m_pGameView->Update();
     DrawBoard();
     DrawPiece(mXPosition, mYPosition, mTetromino, mRotation);
     DrawPiece(mNextXPosition, mNextYPosition, mNextTetromino, mNextRotation);
-    m_pGameView->DrawText("Super Fun Game", &textRectangle, textColor);
+    m_pGameView->DrawText("Super Fun Game", &titleRectangle, textColor, 48);
+    m_pGameView->DrawText("Score: " + std::to_string(mPlayerScore), &scoreRectangle, textColor, 32);
     m_pGameView->Render();
 }
 
