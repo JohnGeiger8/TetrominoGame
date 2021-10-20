@@ -10,6 +10,7 @@
 #define TetrominoLogic_hpp
 
 #include <time.h>
+#include <deque>
 #include "TetrominoBoard.hpp"
 #include "Tetrominos.hpp"
 #include "TetrominoView.hpp"
@@ -17,12 +18,16 @@
 
 #define PIECE_MOVE_TIME 150 // Time until movement events should be run again
 #define PIECE_DROP_START_TIME 700 // Time until piece drops a block
+#define NUMBER_PREVIEW_PIECES 3 // Number of pieces to show on side
 
 //
 // Handles all the game logic
 //
 class TetrominoLogic
 {
+    using TetrominoList = deque<Tetromino>;
+    using RotationList = deque<Rotation>;
+    
 public:
     TetrominoLogic(int screenHeight);
     
@@ -55,11 +60,11 @@ private:
     int mPlayerScore;
     
     int mXPosition, mYPosition; // Position of the piece that is falling down
-    int mNextXPosition, mNextYPosition; // Position of the next piece
+    deque<int> mNextXPositions, mNextYPositions; // Positions of the next 3 pieces
     Tetromino mTetromino; // Type of piece that is falling down
     Rotation mRotation; // Rotation of the piece that is falling down
-    Tetromino mNextTetromino; // Type of the next piece
-    Rotation mNextRotation; // Rotation of the next piece
+    TetrominoList mNextTetrominos; // Types of the next 3 pieces
+    RotationList mNextRotations; // Rotations of the next 3 pieces
     std::shared_ptr<Timer> m_pGameSessionTimer; // Timer tracking how long the user has been playing session
     std::shared_ptr<Timer> mGameCycleTimer; // Timer tracking Tetromino drop cycle
     std::shared_ptr<Timer> m_pTetrominoMovementTimer; // Timer tracking how long since the user's piece moved

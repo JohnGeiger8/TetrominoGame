@@ -28,12 +28,14 @@ TetrominoLogic::TetrominoLogic(int screenHeight)
     mPlayerLevel = 1;
     mPlayerScore = 0;
     
+    mNextXPositions = { };
+    mNextYPositions = { };
+    mNextTetrominos = { };
+    mNextRotations = { };
+    
     mXPosition = 0; mYPosition = 0;
-    mNextXPosition = 0; mNextYPosition = 0;
     mTetromino = 0;
     mRotation = 0;
-    mNextTetromino = 0;
-    mNextRotation = 0;
 }
 
 //
@@ -58,11 +60,14 @@ bool TetrominoLogic::Init(SDL_Window* pWindow)
     mXPosition = (BOARD_WIDTH / 2) + Tetrominos::GetInitialPositionX(mTetromino, mRotation);
     mYPosition = Tetrominos::GetInitialPositionY(mTetromino, mRotation);
     
-    // Next piece
-    mNextTetromino = GetRandomNumber(0, 6);
-    mNextRotation = GetRandomNumber(0, 3);
-    mNextXPosition = BOARD_WIDTH + 5;
-    mNextYPosition = 5;
+    // Next pieces
+    for (int i = 0; i < NUMBER_PREVIEW_PIECES; ++i)
+    {
+        mNextTetrominos.push_back(GetRandomNumber(0, 6));
+        mNextRotations.push_back(GetRandomNumber(0, 3));
+        mNextXPositions.push_back(BOARD_WIDTH + 5);
+        mNextYPositions.push_back(i * PIECE_BLOCKS);
+    }
         
     // Initialize Game View
     m_pGameView = std::make_shared<TetrominoView>();
@@ -196,7 +201,12 @@ void TetrominoLogic::OnRender()
     m_pGameView->Update();
     DrawBoard();
     DrawPiece(mXPosition, mYPosition, mTetromino, mRotation);
-    DrawPiece(mNextXPosition, mNextYPosition, mNextTetromino, mNextRotation);
+    
+    for (int i = 0; i < NUMBER_PREVIEW_PIECES; ++i)
+    {
+        DrawPiece(mNextXPositions[i], mNextYPositions[i], mNextTetrominos[i], mNextRotations[i]);
+    }
+    
     m_pGameView->DrawText("Super Fun Game", &titleRectangle, textColor, 48);
     m_pGameView->DrawText("Score: " + std::to_string(mPlayerScore), &scoreRectangle, textColor, 32);
     m_pGameView->Render();
@@ -263,16 +273,16 @@ void TetrominoLogic::UpdateScore(int numberDeletedLines)
 void TetrominoLogic::CreateNewTetromino()
 {
     // New Tetromino
-    mTetromino = mNextTetromino;
-    mRotation = mNextRotation;
+    mTetromino = mNextTetrominos.front();
+    mNextTetrominos.pop_front();
+    mRotation = mNextRotations.front();
+    mNextRotations.pop_front();
     mXPosition = (BOARD_WIDTH / 2) + Tetrominos::GetInitialPositionX(mTetromino, mRotation);
     mYPosition = Tetrominos::GetInitialPositionY(mTetromino, mRotation);
     
-    // FIXME: should these just be vectors/queues/lists?
-    
     // Next tetromino
-    mNextTetromino = GetRandomNumber(0, 6);
-    mNextRotation = GetRandomNumber(0, 3);
+    mNextTetrominos.push_back(GetRandomNumber(0, 6));
+    mNextRotations.push_back(GetRandomNumber(0, 3));
 }
 
 //
