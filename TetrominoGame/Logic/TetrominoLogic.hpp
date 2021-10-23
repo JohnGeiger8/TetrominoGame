@@ -43,6 +43,7 @@ public:
 private:
     int GetRandomNumber(int pA, int pB);
     void StoreTetrominoAndReset();
+    void StashTetromino();
     void UpdateScore(int numberDeletedLines);
     void DrawBoard();
     void DrawPiece(int x, int y, Tetromino tetromino, Rotation rotation);
@@ -61,8 +62,12 @@ private:
     
     int mXPosition, mYPosition; // Position of the piece that is falling down
     deque<int> mNextXPositions, mNextYPositions; // Positions of the next 3 pieces
+    
     Tetromino mTetromino; // Type of piece that is falling down
     Rotation mRotation; // Rotation of the piece that is falling down
+    Tetromino mStashedTetromino; // Type of piece that's stashed
+    Rotation mStashedRotation; // Rotation of piece that's stashed
+    
     TetrominoList mNextTetrominos; // Types of the next 3 pieces
     RotationList mNextRotations; // Rotations of the next 3 pieces
     std::shared_ptr<Timer> m_pGameSessionTimer; // Timer tracking how long the user has been playing session

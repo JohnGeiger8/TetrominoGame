@@ -36,6 +36,9 @@ TetrominoLogic::TetrominoLogic(int screenHeight)
     mXPosition = 0; mYPosition = 0;
     mTetromino = 0;
     mRotation = 0;
+    
+    mStashedTetromino = -1; // No tetromino there yet
+    mStashedRotation = -1;
 }
 
 //
@@ -131,6 +134,10 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
                 if (m_pBoard->IsPossibleMovement(mXPosition, mYPosition + 1, mTetromino, mRotation))
                     mYPosition++;
             }
+            else if (keyStates[SDL_SCANCODE_S])
+            {
+                StashTetromino();
+            }
             else if (keyStates[SDL_SCANCODE_X])
             {
                 // Move piece straight down
@@ -196,16 +203,23 @@ void TetrominoLogic::OnRender()
 {
     SDL_Rect titleRectangle = { SCREEN_WIDTH / 2, 10, 100, 100 };
     SDL_Rect scoreRectangle = { SCREEN_WIDTH / 2, 120, 100, 100 };
-    SDL_Color textColor = { 0x00, 0x00, 0xFF, 0xFF };
+    SDL_Rect stashRectangle = { BOARD_POSITION - (BOARD_WIDTH / 2) - 140, SCREEN_HEIGHT - (BLOCK_SIZE * BOARD_HEIGHT), 100, 100 };
+    SDL_Color textColor = { 0x00, 0xFF, 0xFF, 0xFF };
     
     m_pGameView->Update();
     DrawBoard();
     DrawPiece(mXPosition, mYPosition, mTetromino, mRotation);
     
+    // Draw next 3 pieces on right side of board
     for (int i = 0; i < NUMBER_PREVIEW_PIECES; ++i)
     {
         DrawPiece(mNextXPositions[i], mNextYPositions[i], mNextTetrominos[i], mNextRotations[i]);
     }
+    
+    // Draw stashed piece on left side of board
+    m_pGameView->DrawText("Stashed [S]", &stashRectangle, textColor, 16);
+    if (mStashedTetromino != -1)
+        DrawPiece( -PIECE_BLOCKS - 1, 2, mStashedTetromino, mStashedRotation);
     
     m_pGameView->DrawText("Super Fun Game", &titleRectangle, textColor, 48);
     m_pGameView->DrawText("Score: " + std::to_string(mPlayerScore), &scoreRectangle, textColor, 32);
@@ -228,6 +242,36 @@ void TetrominoLogic::StoreTetrominoAndReset()
     }
     
     CreateNewTetromino();
+    mGameCycleTimer->Start();
+}
+
+//
+// Stashes the current tetromino
+//
+void TetrominoLogic::StashTetromino()
+{
+    if (mStashedTetromino == -1)
+    {
+        mStashedTetromino = mTetromino;
+        mStashedRotation = mRotation;
+        
+        // Need to create a new piece to replace stashed piece
+        CreateNewTetromino();
+    }
+    else
+    {
+        // Swap the current with the stashed tetromino
+        Tetromino tempTetromino = mStashedTetromino;
+        Rotation tempRotation = mStashedRotation;
+        mStashedTetromino = mTetromino;
+        mStashedRotation = mRotation;
+        mTetromino = tempTetromino;
+        mRotation = tempRotation;
+        
+        mXPosition = (BOARD_WIDTH / 2) + Tetrominos::GetInitialPositionX(mTetromino, mRotation);
+        mYPosition = Tetrominos::GetInitialPositionY(mTetromino, mRotation);
+    }
+    
     mGameCycleTimer->Start();
 }
 
