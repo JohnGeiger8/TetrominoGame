@@ -72,7 +72,11 @@ void TetrominoView::Update()
 //
 // Draws a rectangle using SDL
 //
-// Input:
+// Input: `xPositionPixels` is the top left x coordinate of the rectangle.
+//        `yPositionPixels` is the top left y coordinate of the rectangle.
+//        `width` and `height` are the width and height of the rectangle.
+//        `color` is the color and `isFilled` determines if the rectangle
+//        should be solid or not. Both are optional.
 //
 void TetrominoView::DrawRectangle(int xPositionPixels, int yPositionPixels, int width, int height, SDL_Color color, bool isFilled)
 {
