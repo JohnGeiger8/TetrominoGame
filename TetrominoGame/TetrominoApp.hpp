@@ -11,6 +11,7 @@
 
 #include "TetrominoLogic.hpp"
 #include "TetrominoView.hpp"
+#include "Application/Initialization.hpp"
 
 #define WAIT_TIME 700 // Number of ms that the tetromino remains before going 1 block down
 
@@ -19,6 +20,8 @@ class TetrominoApp
 private:
     TetrominoLogic* m_pGameLogic;
     SDL_Window* m_pWindow;
+    
+    GameOptions mOptions;
     int mScreenHeight; // Screen height in pixels
    
 public:

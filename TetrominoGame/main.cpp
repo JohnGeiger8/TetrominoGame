@@ -10,7 +10,7 @@
 
 int main(int argc, const char * argv[])
 {
-    TetrominoApp* pTetrominoApp(new TetrominoApp(SCREEN_HEIGHT));
+    TetrominoApp* pTetrominoApp(new TetrominoApp(600));
     
     if (!pTetrominoApp->InitGame())
     {

@@ -11,6 +11,7 @@
 
 #include <time.h>
 #include <deque>
+#include "Initialization.hpp"
 #include "TetrominoBoard.hpp"
 #include "Tetrominos.hpp"
 #include "TetrominoView.hpp"
@@ -29,7 +30,7 @@ class TetrominoLogic
     using RotationList = deque<Rotation>;
     
 public:
-    TetrominoLogic(int screenHeight);
+    TetrominoLogic(GameOptions options);
     
     bool Init(SDL_Window* pWindow);
     void Shutdown();
@@ -54,7 +55,7 @@ private:
     bool mIsPaused;
     bool mIsGameOver;
     
-    int mScreenHeight;
+    GameOptions mOptions;
     int mDropTime; // Time between each piece dropping
     int mPlayerLevel;
     int mTotalNumberLinesDeleted;

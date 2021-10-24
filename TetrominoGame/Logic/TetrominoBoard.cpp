@@ -20,6 +20,8 @@ bool TetrominoBoard::Init()
     // Initialize board to blank spaces (FREE_POSITION)
     mBoard = Board(BOARD_WIDTH, std::vector<int>(BOARD_HEIGHT, FREE_POSITION));
     
+    mBorderWidth = 6;
+    
     return true;
 }
 
@@ -30,7 +32,7 @@ bool TetrominoBoard::Init()
 //
 int TetrominoBoard::GetXPositionInPixels(int position)
 {
-    return ((BOARD_POSITION - (BLOCK_SIZE * (BOARD_WIDTH / 2)) ) + (position * BLOCK_SIZE));
+    return ((mBoardPosition - (BLOCK_SIZE * (BOARD_WIDTH / 2)) ) + (position * BLOCK_SIZE));
 }
 
 //

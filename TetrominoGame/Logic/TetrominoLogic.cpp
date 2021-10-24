@@ -12,7 +12,7 @@
 //
 // Input: `screenHeight` specifies the height of the screen.
 //
-TetrominoLogic::TetrominoLogic(int screenHeight)
+TetrominoLogic::TetrominoLogic(GameOptions options)
 {
     m_pBoard = NULL;
     m_pGameView = NULL;
@@ -23,7 +23,7 @@ TetrominoLogic::TetrominoLogic(int screenHeight)
     mIsPaused = false;
     mIsGameOver = false;
     
-    mScreenHeight = screenHeight;
+    mOptions = options;
     mDropTime = PIECE_DROP_START_TIME;
     mPlayerLevel = 1;
     mPlayerScore = 0;
@@ -49,7 +49,7 @@ TetrominoLogic::TetrominoLogic(int screenHeight)
 bool TetrominoLogic::Init(SDL_Window* pWindow)
 {
     // Initialize the Board and pieces
-    m_pBoard = std::make_shared<TetrominoBoard>(mScreenHeight);
+    m_pBoard = std::make_shared<TetrominoBoard>(mOptions.mScreenHeight);
     if (!m_pBoard->Init())
     {
         printf("Game Board failed initialization failed.");
@@ -201,9 +201,9 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
 //
 void TetrominoLogic::OnRender()
 {
-    SDL_Rect titleRectangle = { SCREEN_WIDTH / 2, 10, 100, 100 };
-    SDL_Rect scoreRectangle = { SCREEN_WIDTH / 2, 120, 100, 100 };
-    SDL_Rect stashRectangle = { BOARD_POSITION - (BOARD_WIDTH / 2) - 140, SCREEN_HEIGHT - (BLOCK_SIZE * BOARD_HEIGHT), 100, 100 };
+    SDL_Rect titleRectangle = { mOptions.mScreenWidth / 2, 10, 100, 100 };
+    SDL_Rect scoreRectangle = { mOptions.mScreenWidth / 2, 120, 100, 100 };
+    SDL_Rect stashRectangle = { m_pBoard->GetBoardPositionInPixels() - (BOARD_WIDTH / 2) - 140, mOptions.mScreenHeight - (BLOCK_SIZE * BOARD_HEIGHT), 100, 100 };
     SDL_Color textColor = { 0x00, 0xFF, 0xFF, 0xFF };
     
     m_pGameView->Update();
@@ -335,14 +335,14 @@ void TetrominoLogic::CreateNewTetromino()
 void TetrominoLogic::DrawBoard()
 {
     // Calculate the limits of the board in pixels
-    int leftBorderX = BOARD_POSITION - (BLOCK_SIZE * (BOARD_WIDTH / 2)) - 1;
-    int rightBorderX = BOARD_POSITION + (BLOCK_SIZE * (BOARD_WIDTH / 2));
-    int borderY = SCREEN_HEIGHT - (BLOCK_SIZE * BOARD_HEIGHT);
+    int leftBorderX = m_pBoard->GetBoardPositionInPixels() - (BLOCK_SIZE * (BOARD_WIDTH / 2)) - 1;
+    int rightBorderX = m_pBoard->GetBoardPositionInPixels() + (BLOCK_SIZE * (BOARD_WIDTH / 2));
+    int borderY = mOptions.mScreenHeight - (BLOCK_SIZE * BOARD_HEIGHT);
 
     // Rectangles that delimit the board
     SDL_Color blue = {0x00, 0x00, 0xFF, 0xFF};
-    m_pGameView->DrawRectangle(leftBorderX - BOARD_LINE_WIDTH, borderY, BOARD_LINE_WIDTH, SCREEN_HEIGHT - 1, blue);
-    m_pGameView->DrawRectangle(rightBorderX, borderY, BOARD_LINE_WIDTH, SCREEN_HEIGHT - 1, blue);
+    m_pGameView->DrawRectangle(leftBorderX - m_pBoard->GetBorderWidthInPixels(), borderY, m_pBoard->GetBorderWidthInPixels(), mOptions.mScreenHeight - 1, blue);
+    m_pGameView->DrawRectangle(rightBorderX, borderY, m_pBoard->GetBorderWidthInPixels(), mOptions.mScreenHeight - 1, blue);
 
     // Draw blocks stored in board
     for (int i = 0; i < BOARD_WIDTH; ++i)

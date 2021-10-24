@@ -15,6 +15,6 @@ GameOptions::GameOptions()
     mSoundEffectsVolume = 1.0f;
     mMusicVolume = 1.0f;
 
-    mScreenWidth = 580;
+    mScreenWidth = 600;
     mScreenHeight = 600;
 }

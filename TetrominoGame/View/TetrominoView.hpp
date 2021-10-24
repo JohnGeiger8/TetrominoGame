@@ -15,9 +15,6 @@
 #include <string>
 #include <vector>
 
-#define SCREEN_HEIGHT 600
-#define SCREEN_WIDTH 600
-
 //
 // Handles the rendering and drawing for the application
 //
