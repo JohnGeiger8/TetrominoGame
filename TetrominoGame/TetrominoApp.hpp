@@ -20,6 +20,7 @@ class TetrominoApp
 private:
     TetrominoLogic* m_pGameLogic;
     SDL_Window* m_pWindow;
+    SDL_Renderer* m_pRenderer;
     
     GameOptions mOptions;
     int mScreenHeight; // Screen height in pixels

@@ -21,20 +21,11 @@ TetrominoView::TetrominoView()
 //
 // Returns: true if successful.
 //
-bool TetrominoView::Init(std::shared_ptr<TetrominoBoard> pBoard, SDL_Window* pWindow)
+bool TetrominoView::Init(std::shared_ptr<TetrominoBoard> pBoard, SDL_Renderer* pRenderer)
 {
     bool success = true;
     
-    m_pRenderer = SDL_CreateRenderer(pWindow, -1, SDL_RENDERER_ACCELERATED);
-    if(m_pRenderer == NULL)
-    {
-        printf( "Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
-        success = false;
-    }
-    else
-    {
-        SDL_SetRenderDrawColor( m_pRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
-    }
+    m_pRenderer = pRenderer;
     
     m_pBoard = pBoard;
     if (m_pBoard == NULL)
@@ -55,13 +46,10 @@ bool TetrominoView::Init(std::shared_ptr<TetrominoBoard> pBoard, SDL_Window* pWi
 }
 
 //
-// Run SDL Destroy functions for renderer and window
+// Close all fonts in use
 //
 void TetrominoView::Shutdown()
 {
-    SDL_DestroyRenderer(m_pRenderer);
-    m_pRenderer = NULL;
-    
     for (auto it = m_pFonts.begin(); it < m_pFonts.end(); ++it)
     {
         TTF_CloseFont(*it);

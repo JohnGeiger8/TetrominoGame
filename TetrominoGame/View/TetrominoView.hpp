@@ -23,7 +23,7 @@ class TetrominoView
 public:
     TetrominoView();
     
-    bool Init(std::shared_ptr<TetrominoBoard> pBoard, SDL_Window* pWindow);
+    bool Init(std::shared_ptr<TetrominoBoard> pBoard, SDL_Renderer* pRenderer);
     void Update();
     void Shutdown();
     

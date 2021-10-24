@@ -15,6 +15,7 @@ TetrominoApp::TetrominoApp(int screenHeight)
     mOptions.mScreenHeight = mScreenHeight;
     
     m_pWindow = NULL;
+    m_pRenderer = NULL;
     m_pGameLogic = NULL;
 }
 
@@ -22,6 +23,9 @@ TetrominoApp::~TetrominoApp()
 {
     delete(m_pGameLogic);
     m_pGameLogic = NULL;
+    
+    SDL_DestroyRenderer(m_pRenderer);
+    m_pRenderer = NULL;
     
     SDL_DestroyWindow(m_pWindow);
     m_pWindow = NULL;
@@ -51,9 +55,21 @@ bool TetrominoApp::InitGame()
         successful = false;
     }
     
+    // Initialize Renderer
+    m_pRenderer = SDL_CreateRenderer(m_pWindow, -1, SDL_RENDERER_ACCELERATED);
+    if(m_pRenderer == NULL)
+    {
+        printf( "Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
+        successful = false;
+    }
+    else
+    {
+        SDL_SetRenderDrawColor( m_pRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
+    }
+    
     // Initialize Game Logic
     m_pGameLogic = new TetrominoLogic(mOptions);
-    if (!m_pGameLogic->Init(m_pWindow))
+    if (!m_pGameLogic->Init(m_pRenderer))
     {
         printf("Error: Game Logic Initialization failed.");
         return false;

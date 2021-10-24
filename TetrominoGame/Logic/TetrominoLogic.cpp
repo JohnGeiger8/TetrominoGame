@@ -46,7 +46,7 @@ TetrominoLogic::TetrominoLogic(GameOptions options)
 //
 // Returns: true if initialization succeeds.
 //
-bool TetrominoLogic::Init(SDL_Window* pWindow)
+bool TetrominoLogic::Init(SDL_Renderer* pRenderer)
 {
     // Initialize the Board and pieces
     m_pBoard = std::make_shared<TetrominoBoard>(mOptions.mScreenHeight);
@@ -74,7 +74,7 @@ bool TetrominoLogic::Init(SDL_Window* pWindow)
         
     // Initialize Game View
     m_pGameView = std::make_shared<TetrominoView>();
-    if (!m_pGameView->Init(m_pBoard, pWindow))
+    if (!m_pGameView->Init(m_pBoard, pRenderer))
     {
         printf("Error: Game View Initialization failed.");
         return false;
@@ -98,10 +98,12 @@ bool TetrominoLogic::Init(SDL_Window* pWindow)
 void TetrominoLogic::Shutdown()
 {
     m_pGameView->Shutdown();
-    mIsGameOver = true;
+    
     m_pGameSessionTimer->Stop();
     m_pTetrominoMovementTimer->Stop();
     mGameCycleTimer->Stop();
+    
+    mIsGameOver = true;
 }
 
 //

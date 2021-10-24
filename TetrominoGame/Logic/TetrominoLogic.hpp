@@ -32,7 +32,7 @@ class TetrominoLogic
 public:
     TetrominoLogic(GameOptions options);
     
-    bool Init(SDL_Window* pWindow);
+    bool Init(SDL_Renderer* pRenderer);
     void Shutdown();
     void OnUpdate(SDL_Event* event);
     void OnRender(); // Can/should this be private
