@@ -1,13 +1,13 @@
 //
-//  UserInterface.hpp
+//  Interfaces.hpp
 //  TetrominoGame
 //
 //  Created by John Geiger on 10/24/21.
 //
 #pragma once
 
-#ifndef UserInterface_hpp
-#define UserInterface_hpp
+#ifndef Interfaces_hpp
+#define Interfaces_hpp
 
 #include <list>
 #include <string>
@@ -23,6 +23,7 @@ using ScreenElementList = std::list<ScreenElementPointer>;
 //
 class IScreenElement
 {
+public:
     virtual void VUpdate()=0;
     virtual bool VIsVisible()=0;
     virtual void VSetVisible(bool visible)=0;
@@ -46,41 +47,4 @@ public:
     virtual bool VIsVisible() const { return m_bIsVisible; }
     virtual void VSetVisible(bool visible) { m_bIsVisible = visible; }
 };
-
-//
-// Represents a main menu with a list of options
-//
-class MainMenu : public UIElement
-{
-private:
-    ScreenElementList mMenuOptions;
-    
-public:
-    MainMenu();
-    
-    void AddMenuOption(ScreenElementPointer screenElement);
-    void RemoveMenuOption(ScreenElementPointer screenElement);
-    
-    virtual void VUpdate();
-};
-
-//
-// Represents a button you would place in a menu
-//
-class MenuButton : public UIElement
-{
-    std::string mButtonText;
-    bool mIsFilled;
-    SDL_Color mColor;
-    
-public:
-    MenuButton(std::string text) : mButtonText(text) { };
-    
-    void SetButtonText(std::string text) { mButtonText = text; };
-    void SetButtonColor(SDL_Color color) { mColor = color; };
-    void SetIsFilled(bool filled) { mIsFilled = filled; };
-    
-    virtual void VUpdate();
-};
-
-#endif /* UserInterface_hpp */
+#endif /* Interfaces_hpp */
