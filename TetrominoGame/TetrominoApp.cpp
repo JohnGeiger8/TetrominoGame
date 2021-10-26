@@ -24,6 +24,8 @@ TetrominoApp::~TetrominoApp()
     delete(m_pGameLogic);
     m_pGameLogic = NULL;
     
+    TTF_Quit();
+    
     SDL_DestroyRenderer(m_pRenderer);
     m_pRenderer = NULL;
     
@@ -65,6 +67,13 @@ bool TetrominoApp::InitGame()
     else
     {
         SDL_SetRenderDrawColor( m_pRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
+    }
+    
+    // Initialize Font library
+    if (TTF_Init() == -1)
+    {
+        printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError());
+        successful = false;
     }
     
     // Initialize Game Logic

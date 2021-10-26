@@ -34,12 +34,6 @@ bool TetrominoView::Init(std::shared_ptr<TetrominoBoard> pBoard, SDL_Renderer* p
         success = false;
     }
     
-    if(TTF_Init() == -1)
-    {
-        printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError());
-        success = false;
-    }
-    
     mDefaultFontPath = "Assets/PTC55F.ttf";
 
     return success;
@@ -55,8 +49,6 @@ void TetrominoView::Shutdown()
         TTF_CloseFont(*it);
     }
     m_pFonts.clear();
-    
-    TTF_Quit();
 }
 
 //
