@@ -10,7 +10,7 @@
 #define Menu_hpp
 
 #include "Interfaces.hpp"
-
+#include "../InputHandlers/IKeyboardHandler.hpp"
 //
 // Represents a main menu with a list of options
 //
@@ -37,15 +37,22 @@ class MenuButtonUI : public UIElement
 {
     std::string mButtonText;
     bool mIsFilled;
+    bool mIsSelected;
+    bool mHasFocus;
     SDL_Color mColor;
     
 public:
     MenuButtonUI(std::string text = "", bool filled = true)
     : mButtonText(text), mIsFilled(filled) { mColor = { 0x00, 0x00, 0xFF }; };
     
+    void Select() { mIsSelected = true; }
     void SetButtonText(std::string text) { mButtonText = text; };
     void SetButtonColor(SDL_Color color) { mColor = color; };
     void SetIsFilled(bool filled) { mIsFilled = filled; };
+    std::string GetButtonText() { return mButtonText; };
+    
+    bool IsSelected() { return mIsSelected; };
+    bool HasFocus() { return mHasFocus; };
     
     virtual void VUpdate();
 };
