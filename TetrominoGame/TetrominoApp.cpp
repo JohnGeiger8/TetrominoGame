@@ -13,6 +13,7 @@ TetrominoApp::TetrominoApp(int screenHeight)
     mScreenHeight = screenHeight;
     mOptions = GameOptions();
     mOptions.mScreenHeight = mScreenHeight;
+    m_bGameStarted = false;
     
     m_pWindow = NULL;
     m_pRenderer = NULL;
@@ -40,7 +41,7 @@ TetrominoApp::~TetrominoApp()
 //
 bool TetrominoApp::InitGame()
 {
-    bool successful;
+    bool successful = true;
     
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -76,14 +77,23 @@ bool TetrominoApp::InitGame()
         successful = false;
     }
     
+    // Initialize Main Menu
+    m_pMainMenu = std::make_shared<MainMenuView>(m_pRenderer);
+    if (!m_pMainMenu->VInit())
+    {
+        printf("Error: Main Menu Initialization failed.");
+        successful = false;
+    }
+    
     // Initialize Game Logic
     m_pGameLogic = new TetrominoLogic(mOptions);
     if (!m_pGameLogic->Init(m_pRenderer))
     {
         printf("Error: Game Logic Initialization failed.");
-        return false;
+        successful = false;
     }
-    return true;
+    
+    return successful;
 }
 
 //
@@ -103,6 +113,20 @@ void TetrominoApp::MainLoop()
                 isQuitting = true;
             }
         }
-        m_pGameLogic->OnUpdate(&event);
+        
+        if (m_bGameStarted)
+            m_pGameLogic->OnUpdate(&event);
+        else
+        {
+            if (isQuitting)
+            {
+                m_pMainMenu->VShutdown();
+            }
+            else
+            {
+                m_pMainMenu->VUpdate();
+                m_pMainMenu->VProcessMessages(&event);
+            }
+        }
     }
 }
