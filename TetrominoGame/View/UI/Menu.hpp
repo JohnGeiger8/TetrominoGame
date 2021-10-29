@@ -9,25 +9,35 @@
 #ifndef Menu_hpp
 #define Menu_hpp
 
+#include <SDL2_ttf/SDL_ttf.h>
+#include <vector>
 #include "Interfaces.hpp"
-#include "../InputHandlers/IKeyboardHandler.hpp"
+#include "Timer.hpp"
+//#include "../InputHandlers/IKeyboardHandler.hpp"
+
+using UIElementPointer = std::shared_ptr<UIElement>;
+using UIElementVector = std::vector<UIElementPointer>;
+
 //
 // Represents a main menu with a list of options
 //
 class MainMenuUI : public UIElement
 {
-private:
-    ScreenElementList mMenuOptions;
+    std::shared_ptr<Timer> m_pUserInputTimer;
+    UIElementVector mMenuOptions;
+    int mActiveMenuOption;
     
 public:
     MainMenuUI();
+    ~MainMenuUI();
     
-    void AddMenuOption(ScreenElementPointer screenElement);
-    void RemoveMenuOption(ScreenElementPointer screenElement);
-    
-    const ScreenElementList GetMenuOptions() const { return mMenuOptions; }
-    
+    void AddMenuOption(UIElementPointer screenElement);
+    void RemoveMenuOption(UIElementPointer screenElement);    
+        
+    // IScreenElement implementation
     virtual void VUpdate();
+    virtual void VRender(SDL_Renderer* pRenderer);
+    virtual void VDrawText(SDL_Renderer* pRenderer) { };
 };
 
 //
@@ -36,25 +46,26 @@ public:
 class MenuButtonUI : public UIElement
 {
     std::string mButtonText;
+    TTF_Font* m_pButtonFont;
+    int mFontSize;
     bool mIsFilled;
-    bool mIsSelected;
-    bool mHasFocus;
     SDL_Color mColor;
     
 public:
-    MenuButtonUI(std::string text = "", bool filled = true)
-    : mButtonText(text), mIsFilled(filled) { mColor = { 0x00, 0x00, 0xFF }; };
+    MenuButtonUI(std::string text = "", bool filled = false);
+    ~MenuButtonUI();
     
-    void Select() { mIsSelected = true; }
     void SetButtonText(std::string text) { mButtonText = text; };
     void SetButtonColor(SDL_Color color) { mColor = color; };
     void SetIsFilled(bool filled) { mIsFilled = filled; };
+    
     std::string GetButtonText() { return mButtonText; };
+    SDL_Color GetColor() { return mColor; };
     
-    bool IsSelected() { return mIsSelected; };
-    bool HasFocus() { return mHasFocus; };
-    
+    // IScreenElement implementation
     virtual void VUpdate();
+    virtual void VRender(SDL_Renderer* pRenderer);
+    virtual void VDrawText(SDL_Renderer* pRenderer);
 };
 
 #endif /* Menu_hpp */
