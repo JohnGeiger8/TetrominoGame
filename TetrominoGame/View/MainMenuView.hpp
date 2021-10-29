@@ -1,0 +1,27 @@
+//
+//  MainMenuView.hpp
+//  TetrominoGame
+//
+//  Created by John Geiger on 10/25/21.
+//
+#pragma once
+
+#ifndef MainMenuView_hpp
+#define MainMenuView_hpp
+
+#include "UI/Menu.hpp"
+#include "HumanView.hpp"
+
+class MainMenuView : public HumanView
+{
+    std::shared_ptr<MainMenuUI> m_pMenu;
+
+public:
+    MainMenuView(SDL_Renderer* pRenderer);
+    
+    virtual bool VInit();
+    virtual void VProcessMessages(SDL_Event* pEvent);
+
+};
+
+#endif /* MainMenuView_hpp */
