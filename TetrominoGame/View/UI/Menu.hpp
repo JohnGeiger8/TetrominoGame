@@ -48,16 +48,14 @@ class MenuButtonUI : public UIElement
     std::string mButtonText;
     TTF_Font* m_pButtonFont;
     int mFontSize;
-    bool mIsFilled;
     SDL_Color mColor;
     
 public:
-    MenuButtonUI(std::string text = "", bool filled = false);
+    MenuButtonUI(std::string text = "");
     ~MenuButtonUI();
     
     void SetButtonText(std::string text) { mButtonText = text; };
     void SetButtonColor(SDL_Color color) { mColor = color; };
-    void SetIsFilled(bool filled) { mIsFilled = filled; };
     
     std::string GetButtonText() { return mButtonText; };
     SDL_Color GetColor() { return mColor; };

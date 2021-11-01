@@ -66,7 +66,7 @@ void MainMenuUI::VUpdate()
 void MainMenuUI::VRender(SDL_Renderer* pRenderer)
 {
     // Update the width and height of menu based on options (with built-in margins)
-    mHeight = 0;
+    mHeight = 15;
     mWidth = 30;
     int maxWidth = 0;
     for (const UIElementPointer &element : mMenuOptions)
@@ -96,14 +96,13 @@ void MainMenuUI::AddMenuOption(UIElementPointer screenElement)
 void MainMenuUI::RemoveMenuOption(UIElementPointer screenElement)
 {
     // FIXME: implement
-    //printf("RemoveMenuOption not implemented");
 }
 
 
 //
 //
 //
-MenuButtonUI::MenuButtonUI(std::string text, bool filled) : mButtonText(text), mIsFilled(filled)
+MenuButtonUI::MenuButtonUI(std::string text) : mButtonText(text)
 {
     mColor = { 0x00, 0x00, 0xFF };
     mFontSize = 16;
@@ -164,8 +163,8 @@ void MenuButtonUI::VDrawText(SDL_Renderer* pRenderer)
     }
     
     // Color of text should be same as rectangle if not filled, otherwise should be white or black
-    SDL_Color white = {0xEE, 0x00, 0xFF, 0xFF};
-    SDL_Color textColor = mIsFilled ? white : mColor;
+    SDL_Color black = { 0x00, 0x00, 0x00, 0xFF };
+    SDL_Color textColor = m_bHasFocus ? black : mColor;
     
     SDL_Surface* textSurface = TTF_RenderText_Blended(m_pButtonFont, mButtonText.c_str(), textColor);
     if (textSurface == NULL)
