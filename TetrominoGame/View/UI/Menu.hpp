@@ -45,8 +45,11 @@ public:
 //
 class MenuButtonUI : public UIElement
 {
+    // FIXME: this would be much cleaner with a Font wrapper class
     std::string mButtonText;
     TTF_Font* m_pButtonFont;
+    SDL_Surface* m_pTextSurface;
+    SDL_Texture* m_pTextTexture;
     int mFontSize;
     SDL_Color mColor;
     
@@ -64,6 +67,9 @@ public:
     virtual void VUpdate();
     virtual void VRender(SDL_Renderer* pRenderer);
     virtual void VDrawText(SDL_Renderer* pRenderer);
+    
+private:
+    void LoadButtonText();
 };
 
 #endif /* Menu_hpp */

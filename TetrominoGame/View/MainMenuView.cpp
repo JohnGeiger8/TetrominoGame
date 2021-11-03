@@ -53,12 +53,22 @@ void MainMenuView::VUpdate()
 {
     HumanView::VUpdate();
     
+    // Start the game
     if (mStartButton->VIsSelected())
     {
         CVar g_isGameStarted = g_cvars.find("isGameStarted")->second;
         g_isGameStarted.SetBoolValue(true);
         g_cvars.erase("isGameStarted");
         g_cvars.insert(pair<std::string, CVar>("isGameStarted", g_isGameStarted));
+    }
+    
+    // Exit the game
+    if (mQuitButton->VIsSelected())
+    {
+        CVar g_isQuitting = g_cvars.find("isQuitting")->second;
+        g_isQuitting.SetBoolValue(true);
+        g_cvars.erase("isQuitting");
+        g_cvars.insert(pair<std::string, CVar>("isQuitting", g_isQuitting));
     }
 }
 

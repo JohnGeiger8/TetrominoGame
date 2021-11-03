@@ -16,10 +16,8 @@ HumanView::HumanView(SDL_Renderer* pRenderer)
 
 HumanView::~HumanView()
 {
-    while (!mScreenElements.empty())
-    {
-        mScreenElements.pop_front();
-    }
+    m_pRenderer = NULL;
+    mScreenElements.clear();
 }
 
 bool HumanView::VInit()

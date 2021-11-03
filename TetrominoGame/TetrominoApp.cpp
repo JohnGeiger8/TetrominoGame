@@ -17,17 +17,19 @@ TetrominoApp::TetrominoApp(int screenHeight)
     m_pWindow = NULL;
     m_pRenderer = NULL;
     m_pGameLogic = NULL;
+    m_pMainMenu = NULL;
     
     // Globals
     CVar g_screenHeight = CVar("screenHeight", screenHeight, 600, "Height of user's window screen", CVAR_INTEGER);
     CVar g_screenWidth = CVar("screenWidth", mOptions.mScreenWidth, 600, "Width of user's window screen", CVAR_INTEGER);
     CVar g_bGameStarted = CVar("isGameStarted", false, false, "Has the actual gameplay loop begun", CVAR_BOOL);
+    CVar g_bIsQuitting = CVar("isQuitting", false, false, "The game should be shutting down if true", CVAR_BOOL);
 }
 
 TetrominoApp::~TetrominoApp()
 {
-    delete(m_pGameLogic);
     m_pGameLogic = NULL;
+    m_pMainMenu = NULL;
     
     TTF_Quit();
     
@@ -90,7 +92,7 @@ bool TetrominoApp::InitGame()
     }
     
     // Initialize Game Logic
-    m_pGameLogic = new TetrominoLogic(mOptions);
+    m_pGameLogic = std::make_shared<TetrominoLogic>(mOptions);
     if (!m_pGameLogic->Init(m_pRenderer))
     {
         printf("Error: Game Logic Initialization failed.");
@@ -112,7 +114,7 @@ void TetrominoApp::MainLoop()
     {
         if (SDL_PollEvent(&event) != 0 && !m_pGameLogic->IsGameOver())
         {
-            if (event.type == SDL_QUIT || m_pGameLogic->IsGameOver())
+            if (event.type == SDL_QUIT || m_pGameLogic->IsGameOver() || g_cvars.find("isQuitting")->second.GetBoolValue())
             {
                 isQuitting = true;
             }

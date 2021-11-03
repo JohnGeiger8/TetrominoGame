@@ -20,14 +20,13 @@
 class TetrominoApp
 {
 private:
-    TetrominoLogic* m_pGameLogic;
+    std::shared_ptr<TetrominoLogic> m_pGameLogic;
     std::shared_ptr<MainMenuView> m_pMainMenu;
     SDL_Window* m_pWindow;
     SDL_Renderer* m_pRenderer;
     
     GameOptions mOptions;
     int mScreenHeight; // Screen height in pixels
-    bool m_bGameStarted;
    
 public:
     TetrominoApp(int screenHeight);

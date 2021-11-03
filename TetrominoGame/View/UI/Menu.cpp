@@ -33,18 +33,20 @@ void MainMenuUI::VUpdate()
     const Uint8* keyStates = SDL_GetKeyboardState(nullptr);
     
     // Only check down/up input if 300 ms has passed since last input
-    if (m_pUserInputTimer->GetTicks() > 350)
+    if (m_pUserInputTimer->GetTicks() > 300)
     {
         if (keyStates[SDL_SCANCODE_DOWN])
         {
             m_pUserInputTimer->Start();
             mMenuOptions[mActiveMenuOption]->VSetFocus(false);
+            mMenuOptions[mActiveMenuOption]->VUpdate();
             mActiveMenuOption = (mActiveMenuOption + 1) % mMenuOptions.size();
         }
         else if (keyStates[SDL_SCANCODE_UP])
         {
             m_pUserInputTimer->Start();
             mMenuOptions[mActiveMenuOption]->VSetFocus(false);
+            mMenuOptions[mActiveMenuOption]->VUpdate();
             mActiveMenuOption = (mActiveMenuOption - 1) % mMenuOptions.size();
         }
         
@@ -106,13 +108,11 @@ MenuButtonUI::MenuButtonUI(std::string text) : mButtonText(text)
 {
     mColor = { 0x00, 0x00, 0xFF };
     mFontSize = 16;
+    m_pButtonFont = NULL;
+    m_pTextTexture = NULL;
+    m_pTextSurface = NULL;
     
-    // Initialize font
-    m_pButtonFont = TTF_OpenFont("Assets/PTC55F.ttf", mFontSize);
-    if (m_pButtonFont == NULL)
-    {
-        printf("Failed to load font! SDL_ttf Error: %s\n", TTF_GetError());
-    }
+    LoadButtonText();
 }
 
 //
@@ -120,8 +120,47 @@ MenuButtonUI::MenuButtonUI(std::string text) : mButtonText(text)
 //
 MenuButtonUI::~MenuButtonUI()
 {
-    if (m_pButtonFont)
-        TTF_CloseFont(m_pButtonFont);
+    SDL_DestroyTexture(m_pTextTexture);
+    m_pTextTexture = NULL;
+    
+    SDL_FreeSurface(m_pTextSurface);
+    m_pTextSurface = NULL;
+    
+    TTF_CloseFont(m_pButtonFont);
+    m_pButtonFont = NULL;
+}
+
+//
+// Does loading of text texture as needed
+//
+void MenuButtonUI::LoadButtonText()
+{
+    if (!m_pButtonFont)
+        m_pButtonFont = TTF_OpenFont("Assets/PTC55F.ttf", mFontSize);
+    
+    if (m_pButtonFont == NULL)
+    {
+        printf("Button font not loaded! SDL_ttf Error: %s\n", TTF_GetError());
+        return;
+    }
+    
+    // Color of text should be same as rectangle if not filled, otherwise should be black
+    SDL_Color black = { 0x00, 0x00, 0x00, 0xFF };
+    SDL_Color textColor = m_bHasFocus ? black : mColor;
+    
+    // If the surface is already allocated, free the old one first
+    if (m_pTextSurface)
+        SDL_FreeSurface(m_pTextSurface);
+    m_pTextSurface = TTF_RenderText_Blended(m_pButtonFont, mButtonText.c_str(), textColor);
+    
+    if (m_pTextSurface == NULL)
+    {
+        printf("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
+        return;
+    }
+    
+    // Color key image
+    SDL_SetColorKey(m_pTextSurface, SDL_TRUE, SDL_MapRGB(m_pTextSurface->format, 0xFF, 0xFF, 0xFF));
 }
 
 
@@ -130,7 +169,7 @@ MenuButtonUI::~MenuButtonUI()
 //
 void MenuButtonUI::VUpdate()
 {
-
+    LoadButtonText();
 }
 
 //
@@ -156,42 +195,17 @@ void MenuButtonUI::VRender(SDL_Renderer* pRenderer)
 //
 void MenuButtonUI::VDrawText(SDL_Renderer* pRenderer)
 {
-    if (m_pButtonFont == NULL)
-    {
-        printf("Button font not loaded! SDL_ttf Error: %s\n", TTF_GetError());
-        return;
-    }
-    
-    // Color of text should be same as rectangle if not filled, otherwise should be white or black
-    SDL_Color black = { 0x00, 0x00, 0x00, 0xFF };
-    SDL_Color textColor = m_bHasFocus ? black : mColor;
-    
-    SDL_Surface* textSurface = TTF_RenderText_Blended(m_pButtonFont, mButtonText.c_str(), textColor);
-    if (textSurface == NULL)
-    {
-        printf("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
-        return;
-    }
-    
-    // Color key image
-    SDL_SetColorKey(textSurface, SDL_TRUE, SDL_MapRGB(textSurface->format, 0xFF, 0xFF, 0xFF));
-
     // Create texture from surface pixels
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(pRenderer, textSurface);
-    if (texture == NULL)
+    m_pTextTexture = SDL_CreateTextureFromSurface(pRenderer, m_pTextSurface);
+    if (m_pTextTexture == NULL)
     {
         printf("Unable to create texture from %s! SDL Error: %s\n", mButtonText.c_str(), SDL_GetError());
     }
-    else
-    {
-        int w = textSurface->w;
-        int h = textSurface->h;
-        SDL_Rect srcRect = { 0, 0, w, h };
-        SDL_Rect destRect = { mPositionX + mWidth/2 - w/2, mPositionY + mHeight/2 - h/2, w, h };
-        
-        SDL_RenderCopy(pRenderer, texture, &srcRect, &destRect);
-    }
-
-    // Get rid of old loaded surface
-    SDL_FreeSurface(textSurface);
+    
+    int w = m_pTextSurface->w;
+    int h = m_pTextSurface->h;
+    SDL_Rect srcRect = { 0, 0, w, h };
+    SDL_Rect destRect = { mPositionX + mWidth/2 - w/2, mPositionY + mHeight/2 - h/2, w, h };
+    
+    SDL_RenderCopy(pRenderer, m_pTextTexture, &srcRect, &destRect);
 }
