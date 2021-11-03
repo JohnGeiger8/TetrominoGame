@@ -13,6 +13,7 @@
 #include "TetrominoView.hpp"
 #include "MainMenuView.hpp"
 #include "Application/Initialization.hpp"
+#include "Application/CVar.hpp"
 
 #define WAIT_TIME 700 // Number of ms that the tetromino remains before going 1 block down
 

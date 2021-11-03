@@ -18,6 +18,11 @@ TetrominoApp::TetrominoApp(int screenHeight)
     m_pWindow = NULL;
     m_pRenderer = NULL;
     m_pGameLogic = NULL;
+    
+    // Globals
+    CVar g_screenHeight = CVar("screenHeight", screenHeight, 600, "Height of user's window screen", CVAR_INTEGER);
+    CVar g_screenWidth = CVar("screenWidth", mOptions.mScreenWidth, 600, "Width of user's window screen", CVAR_INTEGER);
+    CVar g_bGameStarted = CVar("isGameStarted", false, false, "Has the actual gameplay loop begun", CVAR_BOOL);
 }
 
 TetrominoApp::~TetrominoApp()

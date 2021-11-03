@@ -8,8 +8,13 @@
 #include <iostream>
 #include "TetrominoApp.hpp"
 
+//extern GlobalsMap g_pCvars;
+
 int main(int argc, const char * argv[])
 {
+    // Initialize CVars map
+    g_cvars = GlobalsMap();
+    
     TetrominoApp* pTetrominoApp(new TetrominoApp(600));
     
     if (!pTetrominoApp->InitGame())
