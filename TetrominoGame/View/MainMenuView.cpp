@@ -6,6 +6,7 @@
 //
 
 #include "MainMenuView.hpp"
+#include "CVar.hpp"
 
 MainMenuView::MainMenuView(SDL_Renderer *pRenderer) : HumanView(pRenderer)
 {
@@ -26,24 +27,41 @@ bool MainMenuView::VInit()
     m_pMenu->VSetPositionY(50);
     
     // Create menu options
-    std::shared_ptr<MenuButtonUI> startButton = std::make_shared<MenuButtonUI>("Start");
-    startButton->VSetPositionX(m_pMenu->VGetPositionX() + 15);
-    startButton->VSetPositionY(m_pMenu->VGetPositionY() + 15);
-    startButton->VSetWidth(200);
-    startButton->VSetHeight(75);
+    mStartButton = std::make_shared<MenuButtonUI>("Start");
+    mStartButton->VSetPositionX(m_pMenu->VGetPositionX() + 15);
+    mStartButton->VSetPositionY(m_pMenu->VGetPositionY() + 15);
+    mStartButton->VSetWidth(200);
+    mStartButton->VSetHeight(75);
     
-    std::shared_ptr<MenuButtonUI> quitButton = std::make_shared<MenuButtonUI>("Quit");
-    quitButton->VSetPositionX(startButton->VGetPositionX());
-    quitButton->VSetPositionY(startButton->VGetPositionY() + startButton->VGetHeight() + 15);
-    quitButton->VSetWidth(200);
-    quitButton->VSetHeight(75);
+    mQuitButton = std::make_shared<MenuButtonUI>("Quit");
+    mQuitButton->VSetPositionX(mStartButton->VGetPositionX());
+    mQuitButton->VSetPositionY(mStartButton->VGetPositionY() + mStartButton->VGetHeight() + 15);
+    mQuitButton->VSetWidth(200);
+    mQuitButton->VSetHeight(75);
     
-    m_pMenu->AddMenuOption(startButton);
-    m_pMenu->AddMenuOption(quitButton);
+    m_pMenu->AddMenuOption(mStartButton);
+    m_pMenu->AddMenuOption(mQuitButton);
     VPushElement(m_pMenu);
     
     return successful;
 }
+
+//
+// Update menu items and check for button clicks
+//
+void MainMenuView::VUpdate()
+{
+    HumanView::VUpdate();
+    
+    if (mStartButton->VIsSelected())
+    {
+        CVar g_isGameStarted = g_cvars.find("isGameStarted")->second;
+        g_isGameStarted.SetBoolValue(true);
+        g_cvars.erase("isGameStarted");
+        g_cvars.insert(pair<std::string, CVar>("isGameStarted", g_isGameStarted));
+    }
+}
+
 
 //
 // Process SDL messages

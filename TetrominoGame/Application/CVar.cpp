@@ -27,7 +27,9 @@ CVar::CVar(std::string name, float value, float defaultValue, std::string descri
 
 CVar::CVar(std::string name, bool value, bool defaultValue, std::string description, int flags)
 {
-    Init(name, std::to_string(value), std::to_string(defaultValue), description, flags);
+    std::string v = value ? "true" : "false";
+    std::string dValue = defaultValue ? "true" : "false";
+    Init(name, v, dValue, description, flags);
 }
 
 bool CVar::Init(std::string name, std::string value, std::string defaultValue, std::string description, int flags)
@@ -41,7 +43,7 @@ bool CVar::Init(std::string name, std::string value, std::string defaultValue, s
     trim(mDefaultValue);
     trim(mDescription);
     
-    std::pair<std::string, CVar*> thisCvar = std::pair<std::string, CVar*>(name, this);
+    std::pair<std::string, CVar> thisCvar = std::pair<std::string, CVar>(name, *this);
     g_cvars.insert(thisCvar);
     
     return true;
@@ -49,7 +51,7 @@ bool CVar::Init(std::string name, std::string value, std::string defaultValue, s
 
 int CVar::GetIntValue()
 {
-    if (mFlags & CVAR_INTEGER)
+    if ((mFlags & CVAR_INTEGER) == CVAR_INTEGER)
         return std::stoi(mValue);
     else
         return std::stoi(mDefaultValue);
@@ -57,7 +59,7 @@ int CVar::GetIntValue()
 
 std::string CVar::GetStringValue()
 {
-    if (mFlags & CVAR_STRING)
+    if ((mFlags & CVAR_STRING) == CVAR_STRING)
         return mValue;
     else
         return mDefaultValue;
@@ -65,7 +67,7 @@ std::string CVar::GetStringValue()
 
 float CVar::GetFloatValue()
 {
-    if (mFlags & CVAR_FLOAT)
+    if ((mFlags & CVAR_FLOAT) == CVAR_FLOAT)
         return std::stof(mValue);
     else
         return std::stof(mDefaultValue);
@@ -73,7 +75,7 @@ float CVar::GetFloatValue()
 
 bool CVar::GetBoolValue()
 {
-    if (mFlags & CVAR_BOOL)
+    if ((mFlags & CVAR_BOOL) == CVAR_BOOL)
         return mValue == "true";
     else
         return mDefaultValue == "true";

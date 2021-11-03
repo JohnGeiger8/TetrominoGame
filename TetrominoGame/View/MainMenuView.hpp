@@ -15,11 +15,15 @@
 class MainMenuView : public HumanView
 {
     std::shared_ptr<MainMenuUI> m_pMenu;
+    
+    std::shared_ptr<MenuButtonUI> mStartButton;
+    std::shared_ptr<MenuButtonUI> mQuitButton;
 
 public:
     MainMenuView(SDL_Renderer* pRenderer);
     
     virtual bool VInit();
+    virtual void VUpdate();
     virtual void VProcessMessages(SDL_Event* pEvent);
 
 };

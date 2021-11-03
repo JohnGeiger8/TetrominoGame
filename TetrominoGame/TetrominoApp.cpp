@@ -13,7 +13,6 @@ TetrominoApp::TetrominoApp(int screenHeight)
     mScreenHeight = screenHeight;
     mOptions = GameOptions();
     mOptions.mScreenHeight = mScreenHeight;
-    m_bGameStarted = false;
     
     m_pWindow = NULL;
     m_pRenderer = NULL;
@@ -119,7 +118,8 @@ void TetrominoApp::MainLoop()
             }
         }
         
-        if (m_bGameStarted)
+        CVar g_isGameStarted = g_cvars.find("isGameStarted")->second;
+        if (g_isGameStarted.GetBoolValue())
             m_pGameLogic->OnUpdate(&event);
         else
         {

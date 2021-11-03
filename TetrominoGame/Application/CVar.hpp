@@ -14,11 +14,11 @@
 
 enum CVarFlags
 {
-    CVAR_BOOL,          // variable is a boolean
-    CVAR_INTEGER,       // variable is an integer
-    CVAR_STRING,        // variable is a string
-    CVAR_FLOAT,         // variable is a float
-    CVAR_PERSISTENT     // variable should be saved to config file
+    CVAR_BOOL = 0x00,          // variable is a boolean
+    CVAR_INTEGER = 0x01,       // variable is an integer
+    CVAR_STRING = 0x02,        // variable is a string
+    CVAR_FLOAT = 0x03,         // variable is a float
+    CVAR_PERSISTENT = 0x04     // variable should be saved to config file
 };
 
 class CVar
@@ -37,12 +37,12 @@ public:
     void SetIntValue(int value) { mValue = std::to_string(value); };
     void SetStringValue(std::string value) { mValue = value; };
     void SetFloatValue(float value) { mValue = std::to_string(value); };
-    void SetBoolValue(bool value) { mValue = std::to_string(value); };
+    void SetBoolValue(bool value) { mValue = value ? "true" : "false"; };
     void Reset();
 
 private:
     
-    int mFlags;                  // Describes type and nature of CVar
+    unsigned int mFlags;            // Describes type and nature of CVar
     std::string mValue;          // Holds the CVar's raw value
     std::string mDescription;    // Describes CVar
     std::string mDefaultValue;   // Holds the default value to reset the variable to
@@ -51,7 +51,7 @@ private:
 };
 
 // Global list of all CVars:
-using GlobalsMap = std::map<std::string, CVar*>;
+using GlobalsMap = std::map<std::string, CVar>;
 extern GlobalsMap g_cvars;
 
 #endif /* CVar_hpp */
