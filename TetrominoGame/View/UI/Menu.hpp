@@ -9,6 +9,9 @@
 #ifndef Menu_hpp
 #define Menu_hpp
 
+#define HORIZONTAL_BUTTON_MARGINS 30
+#define VERTICAL_BUTTON_MARGINS 40
+
 #include <SDL2_ttf/SDL_ttf.h>
 #include <vector>
 #include "Interfaces.hpp"

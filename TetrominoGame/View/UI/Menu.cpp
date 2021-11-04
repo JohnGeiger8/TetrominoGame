@@ -33,7 +33,7 @@ void MainMenuUI::VUpdate()
     const Uint8* keyStates = SDL_GetKeyboardState(nullptr);
     
     // Only check down/up input if 300 ms has passed since last input
-    if (m_pUserInputTimer->GetTicks() > 300)
+    if (m_pUserInputTimer->GetTicks() > 150)
     {
         if (keyStates[SDL_SCANCODE_DOWN])
         {
@@ -68,13 +68,13 @@ void MainMenuUI::VUpdate()
 void MainMenuUI::VRender(SDL_Renderer* pRenderer)
 {
     // Update the width and height of menu based on options (with built-in margins)
-    mHeight = 15;
-    mWidth = 30;
+    mHeight = VERTICAL_BUTTON_MARGINS;
+    mWidth = HORIZONTAL_BUTTON_MARGINS * 2;
     int maxWidth = 0;
     for (const UIElementPointer &element : mMenuOptions)
     {
         maxWidth = element->VGetWidth() > maxWidth ? element->VGetWidth() : maxWidth;
-        mHeight += element->VGetHeight() + 15;
+        mHeight += element->VGetHeight() + VERTICAL_BUTTON_MARGINS;
     }
     mWidth += maxWidth;
     
@@ -107,7 +107,7 @@ void MainMenuUI::RemoveMenuOption(UIElementPointer screenElement)
 MenuButtonUI::MenuButtonUI(std::string text) : mButtonText(text)
 {
     mColor = { 0x00, 0x00, 0xFF };
-    mFontSize = 16;
+    mFontSize = 24;
     m_pButtonFont = NULL;
     m_pTextTexture = NULL;
     m_pTextSurface = NULL;
