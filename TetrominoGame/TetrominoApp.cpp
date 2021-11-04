@@ -5,6 +5,7 @@
 //  Created by John Geiger on 10/1/21.
 //
 
+#include <SDL2_image/SDL_image.h>
 #include "TetrominoApp.hpp"
 
 SDLRendererPtr g_pRenderer;
@@ -31,6 +32,7 @@ TetrominoApp::~TetrominoApp()
     m_pGameLogic = NULL;
     m_pMainMenu = NULL;
     
+    IMG_Quit();
     TTF_Quit();
     
     g_pRenderer = NULL;
@@ -70,6 +72,14 @@ bool TetrominoApp::InitGame()
     if (TTF_Init() == -1)
     {
         printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError());
+        successful = false;
+    }
+    
+    // Initialize SDL Image with PNG loading
+    int imgFlags = IMG_INIT_PNG;
+    if(!(IMG_Init(imgFlags) & imgFlags))
+    {
+        printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
         successful = false;
     }
     
