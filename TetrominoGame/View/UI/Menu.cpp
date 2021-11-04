@@ -6,6 +6,7 @@
 //
 
 #include "Menu.hpp"
+#include "SDLRenderer.hpp"
 
 MainMenuUI::MainMenuUI()
 {
@@ -65,7 +66,7 @@ void MainMenuUI::VUpdate()
 //
 // Render menu itself and each menu option
 //
-void MainMenuUI::VRender(SDL_Renderer* pRenderer)
+void MainMenuUI::VRender()
 {
     // Update the width and height of menu based on options (with built-in margins)
     mHeight = VERTICAL_BUTTON_MARGINS;
@@ -80,12 +81,12 @@ void MainMenuUI::VRender(SDL_Renderer* pRenderer)
     
     SDL_Rect menuRect = { mPositionX, mPositionY, mWidth, mHeight };
     
-    SDL_SetRenderDrawColor(pRenderer, 0x00, 0x00, 0xFF, 0xFF);
-    SDL_RenderDrawRect(pRenderer, &menuRect);
+    SDL_SetRenderDrawColor(g_pRenderer->GetRenderer(), 0x00, 0x00, 0xFF, 0xFF);
+    SDL_RenderDrawRect(g_pRenderer->GetRenderer(), &menuRect);
     
     for (const UIElementPointer &element : mMenuOptions)
     {
-        element->VRender(pRenderer);
+        element->VRender();
     }
 }
 
@@ -175,28 +176,28 @@ void MenuButtonUI::VUpdate()
 //
 // Draw button and text with padding
 //
-void MenuButtonUI::VRender(SDL_Renderer* pRenderer)
+void MenuButtonUI::VRender()
 {
-    SDL_SetRenderDrawColor(pRenderer, mColor.r, mColor.g, mColor.b, mColor.a);
+    SDL_SetRenderDrawColor(g_pRenderer->GetRenderer(), mColor.r, mColor.g, mColor.b, mColor.a);
     
     // Render button rectangle
     SDL_Rect buttonRect = { mPositionX, mPositionY, mWidth, mHeight };
     
     if (m_bHasFocus)
-        SDL_RenderFillRect(pRenderer, &buttonRect);
+        SDL_RenderFillRect(g_pRenderer->GetRenderer(), &buttonRect);
     else
-        SDL_RenderDrawRect(pRenderer, &buttonRect);
+        SDL_RenderDrawRect(g_pRenderer->GetRenderer(), &buttonRect);
     
-    VDrawText(pRenderer);
+    VDrawText();
 }
 
 //
 // Draw button text
 //
-void MenuButtonUI::VDrawText(SDL_Renderer* pRenderer)
+void MenuButtonUI::VDrawText()
 {
     // Create texture from surface pixels
-    m_pTextTexture = SDL_CreateTextureFromSurface(pRenderer, m_pTextSurface);
+    m_pTextTexture = SDL_CreateTextureFromSurface(g_pRenderer->GetRenderer(), m_pTextSurface);
     if (m_pTextTexture == NULL)
     {
         printf("Unable to create texture from %s! SDL Error: %s\n", mButtonText.c_str(), SDL_GetError());
@@ -207,5 +208,5 @@ void MenuButtonUI::VDrawText(SDL_Renderer* pRenderer)
     SDL_Rect srcRect = { 0, 0, w, h };
     SDL_Rect destRect = { mPositionX + mWidth/2 - w/2, mPositionY + mHeight/2 - h/2, w, h };
     
-    SDL_RenderCopy(pRenderer, m_pTextTexture, &srcRect, &destRect);
+    SDL_RenderCopy(g_pRenderer->GetRenderer(), m_pTextTexture, &srcRect, &destRect);
 }

@@ -23,7 +23,7 @@ class TetrominoView
 public:
     TetrominoView();
     
-    bool Init(std::shared_ptr<TetrominoBoard> pBoard, SDL_Renderer* pRenderer);
+    bool Init(std::shared_ptr<TetrominoBoard> pBoard);
     void Update();
     void Shutdown();
     
@@ -34,7 +34,6 @@ public:
 private:
     std::string mDefaultFontPath;
     std::vector<TTF_Font*> m_pFonts;
-    SDL_Renderer* m_pRenderer;
     std::shared_ptr<TetrominoBoard> m_pBoard;
 };
 

@@ -20,13 +20,13 @@ public:
 
     SDL_Renderer* m_pRenderer;
 
-    HumanView(SDL_Renderer* pRenderer);
+    HumanView();
     ~HumanView();
     
     virtual bool VInit();
     virtual void VShutdown();
     virtual void VUpdate();
-    virtual void VRender(SDL_Renderer* pRenderer);
+    virtual void VRender();
     virtual void VDrawText(std::string text, SDL_Rect* renderRectangle, SDL_Color color = {0xFF, 0xFF, 0xFF, 0xFF}, int fontSize = 16, std::string fontPath = "");
     virtual void VProcessMessages(SDL_Event* pEvent);
     

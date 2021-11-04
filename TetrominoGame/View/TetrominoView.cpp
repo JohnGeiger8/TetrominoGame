@@ -6,10 +6,10 @@
 //
 
 #include "TetrominoView.hpp"
+#include "SDLRenderer.hpp"
 
 TetrominoView::TetrominoView()
 {
-    m_pRenderer = NULL;
     m_pBoard = NULL;
     m_pFonts = std::vector<TTF_Font*>();
 }
@@ -21,12 +21,10 @@ TetrominoView::TetrominoView()
 //
 // Returns: true if successful.
 //
-bool TetrominoView::Init(std::shared_ptr<TetrominoBoard> pBoard, SDL_Renderer* pRenderer)
+bool TetrominoView::Init(std::shared_ptr<TetrominoBoard> pBoard)
 {
     bool success = true;
-    
-    m_pRenderer = pRenderer;
-    
+        
     m_pBoard = pBoard;
     if (m_pBoard == NULL)
     {
@@ -57,8 +55,8 @@ void TetrominoView::Shutdown()
 void TetrominoView::Update()
 {
     // Clear screen
-    SDL_SetRenderDrawColor(m_pRenderer, 0x00, 0x00, 0x00, 0x00);
-    SDL_RenderClear(m_pRenderer);
+    SDL_SetRenderDrawColor(g_pRenderer->GetRenderer(), 0x00, 0x00, 0x00, 0x00);
+    SDL_RenderClear(g_pRenderer->GetRenderer());
 }
 
 //
@@ -73,11 +71,11 @@ void TetrominoView::Update()
 void TetrominoView::DrawRectangle(int xPositionPixels, int yPositionPixels, int width, int height, SDL_Color color, bool isFilled)
 {
     SDL_Rect rectangle = { xPositionPixels, yPositionPixels, width, height };
-    SDL_SetRenderDrawColor(m_pRenderer, color.r, color.g, color.b, color.a);
+    SDL_SetRenderDrawColor(g_pRenderer->GetRenderer(), color.r, color.g, color.b, color.a);
     if (isFilled)
-        SDL_RenderFillRect(m_pRenderer, &rectangle);
+        SDL_RenderFillRect(g_pRenderer->GetRenderer(), &rectangle);
     else
-        SDL_RenderDrawRect(m_pRenderer, &rectangle);
+        SDL_RenderDrawRect(g_pRenderer->GetRenderer(), &rectangle);
 }
 
 //
@@ -119,7 +117,7 @@ void TetrominoView::DrawText(std::string text, SDL_Rect* renderRectangle, SDL_Co
     SDL_SetColorKey(textSurface, SDL_TRUE, SDL_MapRGB(textSurface->format, 0xFF, 0xFF, 0xFF));
 
     //Create texture from surface pixels
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(m_pRenderer, textSurface);
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(g_pRenderer->GetRenderer(), textSurface);
     if (texture == NULL)
     {
         printf("Unable to create texture from %s! SDL Error: %s\n", text.c_str(), SDL_GetError());
@@ -134,7 +132,7 @@ void TetrominoView::DrawText(std::string text, SDL_Rect* renderRectangle, SDL_Co
         renderRectangle->w = w;
         renderRectangle->x -= w/2; // Convert center to top left
         
-        SDL_RenderCopy(m_pRenderer, texture, &srcRect, renderRectangle);
+        SDL_RenderCopy(g_pRenderer->GetRenderer(), texture, &srcRect, renderRectangle);
     }
 
     // Get rid of old loaded surface
@@ -146,5 +144,5 @@ void TetrominoView::DrawText(std::string text, SDL_Rect* renderRectangle, SDL_Co
 //
 void TetrominoView::Render()
 {
-    SDL_RenderPresent(m_pRenderer);
+    SDL_RenderPresent(g_pRenderer->GetRenderer());
 }

@@ -39,8 +39,8 @@ public:
         
     // IScreenElement implementation
     virtual void VUpdate();
-    virtual void VRender(SDL_Renderer* pRenderer);
-    virtual void VDrawText(SDL_Renderer* pRenderer) { };
+    virtual void VRender();
+    virtual void VDrawText() { };
 };
 
 //
@@ -68,8 +68,8 @@ public:
     
     // IScreenElement implementation
     virtual void VUpdate();
-    virtual void VRender(SDL_Renderer* pRenderer);
-    virtual void VDrawText(SDL_Renderer* pRenderer);
+    virtual void VRender();
+    virtual void VDrawText();
     
 private:
     void LoadButtonText();

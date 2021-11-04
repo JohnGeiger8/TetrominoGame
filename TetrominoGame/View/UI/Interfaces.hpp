@@ -25,8 +25,8 @@ class IScreenElement
 {
 public:
     virtual void VUpdate()=0;
-    virtual void VRender(SDL_Renderer* pRenderer)=0;
-    virtual void VDrawText(SDL_Renderer* pRenderer)=0;
+    virtual void VRender()=0;
+    virtual void VDrawText()=0;
     virtual bool VIsVisible()=0;
     virtual void VSetVisible(bool visible)=0;
 };

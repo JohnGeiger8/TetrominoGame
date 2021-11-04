@@ -7,16 +7,15 @@
 
 #include <SDL2_ttf/SDL_ttf.h>
 #include "HumanView.hpp"
+#include "SDLRenderer.hpp"
 
-HumanView::HumanView(SDL_Renderer* pRenderer)
+HumanView::HumanView()
 {
     mScreenElements = ScreenElementList();
-    m_pRenderer = pRenderer;
 }
 
 HumanView::~HumanView()
 {
-    m_pRenderer = NULL;
     mScreenElements.clear();
 }
 
@@ -29,7 +28,6 @@ bool HumanView::VInit()
 
 void HumanView::VShutdown()
 {
-    m_pRenderer = NULL;
     mScreenElements.clear();
 }
 
@@ -43,23 +41,23 @@ void HumanView::VUpdate()
     {
         pElement->VUpdate();
     }
-    VRender(m_pRenderer);
+    VRender();
 }
 
 //
 // Render all screen elements that are visible
 //
-void HumanView::VRender(SDL_Renderer* pRenderer)
+void HumanView::VRender()
 {
-    SDL_SetRenderDrawColor(m_pRenderer, 0x00, 0x00, 0x00, 0xFF);
-    SDL_RenderClear(m_pRenderer);
+    SDL_SetRenderDrawColor(g_pRenderer->GetRenderer(), 0x00, 0x00, 0x00, 0xFF);
+    SDL_RenderClear(g_pRenderer->GetRenderer());
 
     for (ScreenElementPointer &pElement : mScreenElements)
     {
         if (pElement->VIsVisible())
-            pElement->VRender(pRenderer);
+            pElement->VRender();
     }
-    SDL_RenderPresent(m_pRenderer);
+    SDL_RenderPresent(g_pRenderer->GetRenderer());
 }
 
 //
@@ -94,7 +92,7 @@ void HumanView::VDrawText(std::string text, SDL_Rect* renderRectangle, SDL_Color
     SDL_SetColorKey(textSurface, SDL_TRUE, SDL_MapRGB(textSurface->format, 0xFF, 0xFF, 0xFF));
 
     //Create texture from surface pixels
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(m_pRenderer, textSurface);
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(g_pRenderer->GetRenderer(), textSurface);
     if (texture == NULL)
     {
         printf("Unable to create texture from %s! SDL Error: %s\n", text.c_str(), SDL_GetError());
@@ -109,7 +107,7 @@ void HumanView::VDrawText(std::string text, SDL_Rect* renderRectangle, SDL_Color
         renderRectangle->w = w;
         renderRectangle->x -= w/2; // Convert center to top left
         
-        SDL_RenderCopy(m_pRenderer, texture, &srcRect, renderRectangle);
+        SDL_RenderCopy(g_pRenderer->GetRenderer(), texture, &srcRect, renderRectangle);
     }
 
     // Get rid of old loaded surface

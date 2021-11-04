@@ -8,7 +8,7 @@
 #include "MainMenuView.hpp"
 #include "CVar.hpp"
 
-MainMenuView::MainMenuView(SDL_Renderer *pRenderer) : HumanView(pRenderer)
+MainMenuView::MainMenuView()
 {
 }
 

@@ -9,23 +9,24 @@
 #define SDLRenderer_hpp
 
 #include <SDL2/SDL.h>
-#include "IRenderer.hpp"
+#include <memory>
 
 //
-// Represents an SDL Renderer, inheriting from IRenderer
+// Wraps the SDL_Renderer class
 //
-class SDLRenderer : public IRenderer
+class SDLRenderer
 {
 public:
-    virtual void VSetBackgroundColor(unsigned int r, unsigned int g, unsigned int b, unsigned int a);
-    virtual bool VOnRestore();
-    virtual void VShutdown();
-    virtual bool VPreRender();
-    virtual bool VPostRender();
+    SDLRenderer(SDL_Window* pWindow);
+    ~SDLRenderer();
 
+    SDL_Renderer* GetRenderer() { return m_pRenderer; };
 private:
     SDL_Renderer* m_pRenderer;
     
 };
+
+using SDLRendererPtr = std::shared_ptr<SDLRenderer>;
+extern SDLRendererPtr g_pRenderer;
 
 #endif /* SDLRenderer_hpp */

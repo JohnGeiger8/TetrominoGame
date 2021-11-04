@@ -5,8 +5,9 @@
 //  Created by John Geiger on 10/1/21.
 //
 
-#include <SDL2/SDL.h>
 #include "TetrominoApp.hpp"
+
+SDLRendererPtr g_pRenderer;
 
 TetrominoApp::TetrominoApp(int screenHeight)
 {
@@ -15,7 +16,6 @@ TetrominoApp::TetrominoApp(int screenHeight)
     mOptions.mScreenHeight = mScreenHeight;
     
     m_pWindow = NULL;
-    m_pRenderer = NULL;
     m_pGameLogic = NULL;
     m_pMainMenu = NULL;
     
@@ -33,8 +33,7 @@ TetrominoApp::~TetrominoApp()
     
     TTF_Quit();
     
-    SDL_DestroyRenderer(m_pRenderer);
-    m_pRenderer = NULL;
+    g_pRenderer = NULL;
     
     SDL_DestroyWindow(m_pWindow);
     m_pWindow = NULL;
@@ -64,17 +63,8 @@ bool TetrominoApp::InitGame()
         successful = false;
     }
     
-    // Initialize Renderer
-    m_pRenderer = SDL_CreateRenderer(m_pWindow, -1, SDL_RENDERER_ACCELERATED);
-    if(m_pRenderer == NULL)
-    {
-        printf( "Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
-        successful = false;
-    }
-    else
-    {
-        SDL_SetRenderDrawColor( m_pRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
-    }
+    // Initialize Global Renderer
+    g_pRenderer = std::make_shared<SDLRenderer>(m_pWindow);
     
     // Initialize Font library
     if (TTF_Init() == -1)
@@ -84,7 +74,7 @@ bool TetrominoApp::InitGame()
     }
     
     // Initialize Main Menu
-    m_pMainMenu = std::make_shared<MainMenuView>(m_pRenderer);
+    m_pMainMenu = std::make_shared<MainMenuView>();
     if (!m_pMainMenu->VInit())
     {
         printf("Error: Main Menu Initialization failed.");
@@ -93,7 +83,7 @@ bool TetrominoApp::InitGame()
     
     // Initialize Game Logic
     m_pGameLogic = std::make_shared<TetrominoLogic>(mOptions);
-    if (!m_pGameLogic->Init(m_pRenderer))
+    if (!m_pGameLogic->Init())
     {
         printf("Error: Game Logic Initialization failed.");
         successful = false;

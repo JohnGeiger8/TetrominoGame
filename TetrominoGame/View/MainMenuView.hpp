@@ -20,7 +20,7 @@ class MainMenuView : public HumanView
     std::shared_ptr<MenuButtonUI> mQuitButton;
 
 public:
-    MainMenuView(SDL_Renderer* pRenderer);
+    MainMenuView();
     
     virtual bool VInit();
     virtual void VUpdate();
