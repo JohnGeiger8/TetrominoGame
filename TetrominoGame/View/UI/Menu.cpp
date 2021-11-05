@@ -108,10 +108,7 @@ void MainMenuUI::RemoveMenuOption(UIElementPointer screenElement)
 MenuButtonUI::MenuButtonUI(std::string text) : mButtonText(text)
 {
     mColor = { 0x00, 0x00, 0xFF };
-    mFontSize = 24;
-    m_pButtonFont = NULL;
     m_pTextTexture = NULL;
-    m_pTextSurface = NULL;
     
     LoadButtonText();
 }
@@ -121,14 +118,7 @@ MenuButtonUI::MenuButtonUI(std::string text) : mButtonText(text)
 //
 MenuButtonUI::~MenuButtonUI()
 {
-    SDL_DestroyTexture(m_pTextTexture);
     m_pTextTexture = NULL;
-    
-    SDL_FreeSurface(m_pTextSurface);
-    m_pTextSurface = NULL;
-    
-    TTF_CloseFont(m_pButtonFont);
-    m_pButtonFont = NULL;
 }
 
 //
@@ -136,41 +126,20 @@ MenuButtonUI::~MenuButtonUI()
 //
 void MenuButtonUI::LoadButtonText()
 {
-    if (!m_pButtonFont)
-        m_pButtonFont = TTF_OpenFont("Assets/PTC55F.ttf", mFontSize);
-    
-    if (m_pButtonFont == NULL)
-    {
-        printf("Button font not loaded! SDL_ttf Error: %s\n", TTF_GetError());
-        return;
-    }
+    m_pTextTexture = std::make_shared<SDLTextTexture>(mButtonText, 24);
     
     // Color of text should be same as rectangle if not filled, otherwise should be black
-    SDL_Color black = { 0x00, 0x00, 0x00, 0xFF };
-    SDL_Color textColor = m_bHasFocus ? black : mColor;
-    
-    // If the surface is already allocated, free the old one first
-    if (m_pTextSurface)
-        SDL_FreeSurface(m_pTextSurface);
-    m_pTextSurface = TTF_RenderText_Blended(m_pButtonFont, mButtonText.c_str(), textColor);
-    
-    if (m_pTextSurface == NULL)
-    {
-        printf("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
-        return;
-    }
-    
-    // Color key image
-    SDL_SetColorKey(m_pTextSurface, SDL_TRUE, SDL_MapRGB(m_pTextSurface->format, 0xFF, 0xFF, 0xFF));
+    m_bHasFocus ? m_pTextTexture->VSetColor(0x00, 0x00, 0x00) : m_pTextTexture->VSetColor(mColor.r, mColor.g, mColor.b);
 }
 
 
 //
-//
+// Makes updates to button based on its state
 //
 void MenuButtonUI::VUpdate()
 {
-    LoadButtonText();
+    // Color of text should be same as rectangle if not filled, otherwise should be black
+    m_bHasFocus ? m_pTextTexture->VSetColor(0x00, 0x00, 0x00) : m_pTextTexture->VSetColor(mColor.r, mColor.g, mColor.b);
 }
 
 //
@@ -196,17 +165,9 @@ void MenuButtonUI::VRender()
 //
 void MenuButtonUI::VDrawText()
 {
-    // Create texture from surface pixels
-    m_pTextTexture = SDL_CreateTextureFromSurface(g_pRenderer->GetRenderer(), m_pTextSurface);
-    if (m_pTextTexture == NULL)
-    {
-        printf("Unable to create texture from %s! SDL Error: %s\n", mButtonText.c_str(), SDL_GetError());
-    }
-    
-    int w = m_pTextSurface->w;
-    int h = m_pTextSurface->h;
-    SDL_Rect srcRect = { 0, 0, w, h };
-    SDL_Rect destRect = { mPositionX + mWidth/2 - w/2, mPositionY + mHeight/2 - h/2, w, h };
-    
-    SDL_RenderCopy(g_pRenderer->GetRenderer(), m_pTextTexture, &srcRect, &destRect);
+    int w = m_pTextTexture->GetWidth();
+    int h = m_pTextTexture->GetHeight();
+    Point position = Point(mPositionX + mWidth/2 - w/2, mPositionY + mHeight/2 - h/2);
+    m_pTextTexture->SetPosition(position);
+    m_pTextTexture->VRender();
 }

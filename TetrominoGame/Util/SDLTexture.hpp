@@ -15,7 +15,9 @@
 
 class SDLTexture : public ITexture
 {
+protected:
     SDL_Texture* mTexture;
+    SDL_Color mColor;
     
     int mWidth;
     int mHeight;
@@ -25,10 +27,13 @@ public:
     SDLTexture();
     ~SDLTexture();
     
-    void SetColor(Uint8 red, Uint8 green, Uint8 blue);
-    void SetBlendMode(SDL_BlendMode blending);
-    void SetAlpha(Uint8 alpha);
+    virtual void VSetColor(Uint8 red, Uint8 green, Uint8 blue);
+    virtual void VSetBlendMode(SDL_BlendMode blending);
+    virtual void VSetAlpha(Uint8 alpha);
     
+    void SetPosition(Point position) { mPosition = position; };
+    
+    Point GetPosition() { return mPosition; };
     int GetWidth() { return mWidth; };
     int GetHeight() { return mHeight; };
     

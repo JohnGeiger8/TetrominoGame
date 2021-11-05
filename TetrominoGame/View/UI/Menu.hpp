@@ -16,7 +16,7 @@
 #include <vector>
 #include "Interfaces.hpp"
 #include "Timer.hpp"
-//#include "../InputHandlers/IKeyboardHandler.hpp"
+#include "SDLTextTexture.hpp"
 
 using UIElementPointer = std::shared_ptr<UIElement>;
 using UIElementVector = std::vector<UIElementPointer>;
@@ -48,13 +48,9 @@ public:
 //
 class MenuButtonUI : public UIElement
 {
-    // FIXME: this would be much cleaner with a Font wrapper class
     std::string mButtonText;
-    TTF_Font* m_pButtonFont;
-    SDL_Surface* m_pTextSurface;
-    SDL_Texture* m_pTextTexture;
-    int mFontSize;
     SDL_Color mColor;
+    std::shared_ptr<SDLTextTexture> m_pTextTexture;
     
 public:
     MenuButtonUI(std::string text = "");

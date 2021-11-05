@@ -83,15 +83,16 @@ bool SDLTexture::VLoadTextureFromFile(std::string path)
 //
 // Sets SDL's texture color modulator
 //
-void SDLTexture::SetColor(Uint8 red, Uint8 green, Uint8 blue)
+void SDLTexture::VSetColor(Uint8 red, Uint8 green, Uint8 blue)
 {
-    SDL_SetTextureColorMod(mTexture, red, green, blue);
+    mColor = { red, green, blue, 0xFF };
+//    SDL_SetTextureColorMod(mTexture, red, green, blue); // FIXME: What is this
 }
 
 //
 // Sets SDL's blending mode
 //
-void SDLTexture::SetBlendMode(SDL_BlendMode blending)
+void SDLTexture::VSetBlendMode(SDL_BlendMode blending)
 {
     SDL_SetTextureBlendMode(mTexture, blending);
 }
@@ -99,7 +100,7 @@ void SDLTexture::SetBlendMode(SDL_BlendMode blending)
 //
 // Set Texture alpha value
 //
-void SDLTexture::SetAlpha(Uint8 alpha)
+void SDLTexture::VSetAlpha(Uint8 alpha)
 {
     SDL_SetTextureAlphaMod(mTexture, alpha);
 }
