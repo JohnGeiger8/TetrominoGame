@@ -7,6 +7,7 @@
 
 #include "Menu.hpp"
 #include "SDLRenderer.hpp"
+#include "CVar.hpp"
 
 MainMenuUI::MainMenuUI()
 {
@@ -17,6 +18,7 @@ MainMenuUI::MainMenuUI()
     m_pUserInputTimer->Start();
     
     mMenuOptions = { };
+    mColor = { 0x00, 0x00, 0x00, 0xFF };
 }
 
 MainMenuUI::~MainMenuUI()
@@ -79,9 +81,15 @@ void MainMenuUI::VRender()
     }
     mWidth += maxWidth;
     
+    // Update positions
+    int screenWidth = g_cvars.find("screenWidth")->second.GetIntValue();
+    int screenHeight = g_cvars.find("screenHeight")->second.GetIntValue();
+    mPositionX = screenWidth / 2 - mWidth / 2;
+    mPositionY = screenHeight / 2 - mHeight / 2;
+    
     SDL_Rect menuRect = { mPositionX, mPositionY, mWidth, mHeight };
     
-    SDL_SetRenderDrawColor(g_pRenderer->GetRenderer(), 0x00, 0x00, 0xFF, 0xFF);
+    SDL_SetRenderDrawColor(g_pRenderer->GetRenderer(), mColor.r, mColor.g, mColor.b, mColor.a);
     SDL_RenderDrawRect(g_pRenderer->GetRenderer(), &menuRect);
     
     for (const UIElementPointer &element : mMenuOptions)

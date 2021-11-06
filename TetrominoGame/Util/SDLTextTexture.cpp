@@ -23,8 +23,21 @@ SDLTextTexture::SDLTextTexture()
 //
 SDLTextTexture::~SDLTextTexture()
 {
-    TTF_CloseFont(m_pFont);
-    m_pFont = NULL;
+    VShutdown();
+}
+
+//
+// Destroys the old texture and font
+//
+void SDLTextTexture::VShutdown()
+{
+    SDLTexture::VShutdown();
+    
+    if (m_pFont != NULL)
+    {
+        TTF_CloseFont(m_pFont);
+        m_pFont = NULL;
+    }
 }
 
 //

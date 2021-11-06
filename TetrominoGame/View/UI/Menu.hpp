@@ -28,11 +28,14 @@ class MainMenuUI : public UIElement
 {
     std::shared_ptr<Timer> m_pUserInputTimer;
     UIElementVector mMenuOptions;
+    SDL_Color mColor;
     int mActiveMenuOption;
     
 public:
     MainMenuUI();
     ~MainMenuUI();
+    
+    void SetColor(SDL_Color color) { mColor = color; };
     
     void AddMenuOption(UIElementPointer screenElement);
     void RemoveMenuOption(UIElementPointer screenElement);    

@@ -27,6 +27,8 @@ bool MainMenuView::VInit()
     m_pMenu = std::make_shared<MainMenuUI>();
     
     // Create menu options
+    SDL_Color titleColor = { 0x00, 0xFF, 0xFF };
+    std::shared_ptr<TitleUI> pTitleUI = std::make_shared<TitleUI>("BLOCK DROPPER", 36, titleColor);
     mStartButton = std::make_shared<MenuButtonUI>("Start");
     mQuitButton = std::make_shared<MenuButtonUI>("Quit");
 
@@ -42,10 +44,20 @@ bool MainMenuView::VInit()
     m_pMenu->VSetWidth(mStartButton->VGetWidth() + 2 * HORIZONTAL_BUTTON_MARGINS);
     m_pMenu->VSetHeight(mStartButton->VGetHeight() + mQuitButton->VGetHeight() + 3 * VERTICAL_BUTTON_MARGINS);
     m_pMenu->VSetPositionY((screenHeight / 2) - (m_pMenu->VGetHeight() / 2));
+    
+    // Title position should be centered because it's text
+    pTitleUI->VSetPositionX(m_pMenu->VGetPositionX() + m_pMenu->VGetWidth() / 2);
+    pTitleUI->VSetPositionY(m_pMenu->VGetPositionY() + VERTICAL_BUTTON_MARGINS);
 
-    mStartButton->VSetPositionY(m_pMenu->VGetPositionY() + VERTICAL_BUTTON_MARGINS);
+    mStartButton->VSetPositionY(pTitleUI->VGetPositionY() + pTitleUI->VGetHeight() + VERTICAL_BUTTON_MARGINS);
     mQuitButton->VSetPositionY(mStartButton->VGetPositionY() + mStartButton->VGetHeight() + VERTICAL_BUTTON_MARGINS);
 
+    // Colors
+    mStartButton->SetButtonColor({0x00, 0xFF, 0xFF});
+    mQuitButton->SetButtonColor({0x00, 0xFF, 0xFF});
+    m_pMenu->SetColor({0x00, 0x00, 0x00, 0x00}); // Transparent
+    
+    m_pMenu->AddMenuOption(pTitleUI);
     m_pMenu->AddMenuOption(mStartButton);
     m_pMenu->AddMenuOption(mQuitButton);
     VPushElement(m_pMenu);

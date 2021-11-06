@@ -27,6 +27,8 @@ public:
         : mText(text), mFontSize(fontSize) { m_pFont = NULL; mFontPath = DEFAULT_FONT_PATH; };
     ~SDLTextTexture();
     
+    virtual void VShutdown();
+    
     bool LoadTextTextureFromFile(std::string path);
     
     // 'Change' instead of 'Set' indicates non-trivial set (re-renders texture)

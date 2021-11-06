@@ -10,6 +10,7 @@
 #define MainMenuView_hpp
 
 #include "UI/Menu.hpp"
+#include "UI/TitleUI.hpp"
 #include "HumanView.hpp"
 
 class MainMenuView : public HumanView
