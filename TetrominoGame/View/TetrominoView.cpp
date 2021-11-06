@@ -32,7 +32,7 @@ bool TetrominoView::Init(std::shared_ptr<TetrominoBoard> pBoard)
         success = false;
     }
     
-    mDefaultFontPath = "Assets/PTC55F.ttf";
+    mDefaultFontPath = "Assets/ARCADECLASSIC.ttf";
 
     return success;
 }

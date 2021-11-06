@@ -9,7 +9,7 @@
 #ifndef SDLTextTexture_hpp
 #define SDLTextTexture_hpp
 
-#define DEFAULT_FONT_PATH "Assets/PTC55F.ttf"
+#define DEFAULT_FONT_PATH "Assets/ARCADECLASSIC.ttf"
 
 #include <SDL2_ttf/SDL_ttf.h>
 #include "SDLTexture.hpp"

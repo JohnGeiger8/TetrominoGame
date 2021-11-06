@@ -37,7 +37,7 @@ public:
     void OnUpdate(SDL_Event* event);
     void OnRender(); // Can/should this be private
     
-    bool IsGameOver() { return mIsGameOver; };
+    bool IsGameOver() { return m_bIsGameOver; };
 
     void CreateNewTetromino();
 
@@ -52,8 +52,9 @@ private:
     std::shared_ptr<TetrominoBoard> m_pBoard;
     std::shared_ptr<TetrominoView> m_pGameView;
         
-    bool mIsPaused;
-    bool mIsGameOver;
+    bool m_bIsPaused;
+    bool m_bIsGameOver;
+    bool m_bHasStashed;
     
     GameOptions mOptions;
     int mDropTime; // Time between each piece dropping

@@ -20,8 +20,9 @@ TetrominoLogic::TetrominoLogic(GameOptions options)
     m_pGameSessionTimer = NULL;
     m_pTetrominoMovementTimer = NULL;
     
-    mIsPaused = false;
-    mIsGameOver = false;
+    m_bIsPaused = false;
+    m_bIsGameOver = false;
+    m_bHasStashed = false;
     
     mOptions = options;
     mDropTime = PIECE_DROP_START_TIME;
@@ -103,7 +104,7 @@ void TetrominoLogic::Shutdown()
     m_pTetrominoMovementTimer->Stop();
     mGameCycleTimer->Stop();
     
-    mIsGameOver = true;
+    m_bIsGameOver = true;
 }
 
 //
@@ -138,20 +139,28 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
             }
             else if (keyStates[SDL_SCANCODE_S])
             {
-                StashTetromino();
+                if (!m_bHasStashed)
+                {
+                    StashTetromino();
+                    m_bHasStashed = true;
+                }
             }
             else if (keyStates[SDL_SCANCODE_X])
             {
-                // Move piece straight down
-                while (m_pBoard->IsPossibleMovement(mXPosition, mYPosition + 1, mTetromino, mRotation))
+                // If the piece already can't go down, the gamecycletimer shouldn't reset
+                if (m_pBoard->IsPossibleMovement(mXPosition, mYPosition + 1, mTetromino, mRotation))
                 {
-                    mYPosition++;
+                    // Move piece straight down
+                    while (m_pBoard->IsPossibleMovement(mXPosition, mYPosition + 1, mTetromino, mRotation))
+                    {
+                        mYPosition++;
+                    }
+                    
+                    // Restart game cycle to give user a chance to move piece sideways
+                    mGameCycleTimer->Start(); // FIXME: bug: user can spam x to avoid timer restarting
+                    OnRender();
+                    return;
                 }
-                
-                // Restart game cycle to give user a chance to move piece sideways
-                mGameCycleTimer->Start(); // FIXME: bug: user can spam x to avoid timer restarting
-                OnRender();
-                return;
             }
             else if (keyStates[SDL_SCANCODE_Z])
             {
@@ -163,12 +172,12 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
                 if (mGameCycleTimer->IsPaused())
                 {
                     mGameCycleTimer->Unpause();
-                    mIsPaused = false;
+                    m_bIsPaused = false;
                 }
                 else
                 {
                     mGameCycleTimer->Pause();
-                    mIsPaused = true;
+                    m_bIsPaused = true;
                 }
             }
             OnRender();
@@ -178,7 +187,7 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
             break;
     }
     
-    if (!mIsPaused)
+    if (!m_bIsPaused)
     {
         Uint32 time = mGameCycleTimer->GetTicks();
 
@@ -204,7 +213,8 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
 void TetrominoLogic::OnRender()
 {
     SDL_Rect titleRectangle = { mOptions.mScreenWidth / 2, 10, 100, 100 };
-    SDL_Rect scoreRectangle = { mOptions.mScreenWidth / 2, 120, 100, 100 };
+    SDL_Rect scoreTextRectangle = { mOptions.mScreenWidth / 2, 120, 100, 100 };
+    SDL_Rect scoreRectangle = { scoreTextRectangle.x, scoreTextRectangle.y + 35, 100, 100 };
     SDL_Rect stashRectangle = { m_pBoard->GetBoardPositionInPixels() - (BOARD_WIDTH / 2) - 140, mOptions.mScreenHeight - (BLOCK_SIZE * BOARD_HEIGHT), 100, 100 };
     SDL_Color textColor = { 0x00, 0xFF, 0xFF, 0xFF };
     
@@ -219,12 +229,13 @@ void TetrominoLogic::OnRender()
     }
     
     // Draw stashed piece on left side of board
-    m_pGameView->DrawText("Stashed [S]", &stashRectangle, textColor, 16);
+    m_pGameView->DrawText("S  to  stash", &stashRectangle, textColor, 16);
     if (mStashedTetromino != -1)
         DrawPiece( -PIECE_BLOCKS - 1, 2, mStashedTetromino, mStashedRotation);
     
-    m_pGameView->DrawText("Super Fun Game", &titleRectangle, textColor, 48);
-    m_pGameView->DrawText("Score: " + std::to_string(mPlayerScore), &scoreRectangle, textColor, 32);
+    m_pGameView->DrawText("BLOCK  DROPPER", &titleRectangle, textColor, 48);
+    m_pGameView->DrawText("Score", &scoreTextRectangle, textColor, 32);
+    m_pGameView->DrawText(std::to_string(mPlayerScore), &scoreRectangle, textColor, 32);
     m_pGameView->Render();
 }
 
@@ -245,6 +256,7 @@ void TetrominoLogic::StoreTetrominoAndReset()
     
     CreateNewTetromino();
     mGameCycleTimer->Start();
+    m_bHasStashed = false;
 }
 
 //
