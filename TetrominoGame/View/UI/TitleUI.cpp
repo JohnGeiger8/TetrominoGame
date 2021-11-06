@@ -10,6 +10,7 @@
 TitleUI::TitleUI(std::string text, int fontSize, SDL_Color color)
     : mTitle(text), mFontSize(fontSize), mColor(color)
 {
+    m_bIsFocusable = false;
     VLoadTitleText();
 }
 

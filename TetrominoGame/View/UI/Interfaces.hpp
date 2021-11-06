@@ -43,9 +43,10 @@ protected:
     bool m_bIsVisible;
     bool m_bIsSelected;
     bool m_bHasFocus;
+    bool m_bIsFocusable;
     
 public:
-    UIElement() { mPositionX = 0; mPositionY = 0; mWidth = 100; mHeight = 100; m_bIsVisible = true; m_bIsSelected = false; m_bHasFocus = false; };
+    UIElement() { mPositionX = 0; mPositionY = 0; mWidth = 100; mHeight = 100; m_bIsVisible = true; m_bIsSelected = false; m_bHasFocus = false; m_bIsFocusable = true; };
     
     virtual int VGetWidth() { return mWidth; };
     virtual int VGetHeight() { return mHeight; };
@@ -61,6 +62,7 @@ public:
     virtual void VSetFocus(bool focus) { m_bHasFocus = focus; }
     virtual bool VIsSelected() { return m_bIsSelected; };
     virtual bool VHasFocus() { return m_bHasFocus; };
+    virtual bool VIsFocusable() { return m_bIsFocusable; };
     
     virtual void VUpdate() { };
     virtual bool VIsVisible() { return m_bIsVisible; }

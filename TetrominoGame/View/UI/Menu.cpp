@@ -29,6 +29,19 @@ MainMenuUI::~MainMenuUI()
 
 void MainMenuUI::VUpdate()
 {
+    // Make sure current selection can be focused on, otherwise change it
+    while (!mMenuOptions[mActiveMenuOption]->VIsFocusable())
+    {
+        mActiveMenuOption++;
+        
+        // Prevents infinite loop
+        if (mActiveMenuOption >= mMenuOptions.size())
+        {
+            mActiveMenuOption--;
+            break;
+        }
+    }
+    
     if (mMenuOptions.size() == 0)
         return;
     
@@ -40,17 +53,23 @@ void MainMenuUI::VUpdate()
     {
         if (keyStates[SDL_SCANCODE_DOWN])
         {
-            m_pUserInputTimer->Start();
-            mMenuOptions[mActiveMenuOption]->VSetFocus(false);
-            mMenuOptions[mActiveMenuOption]->VUpdate();
-            mActiveMenuOption = (mActiveMenuOption + 1) % mMenuOptions.size();
+            if (mMenuOptions[(mActiveMenuOption + 1) % mMenuOptions.size()]->VIsFocusable())
+            {
+                m_pUserInputTimer->Start();
+                mMenuOptions[mActiveMenuOption]->VSetFocus(false);
+                mMenuOptions[mActiveMenuOption]->VUpdate();
+                mActiveMenuOption = (mActiveMenuOption + 1) % mMenuOptions.size();
+            }
         }
         else if (keyStates[SDL_SCANCODE_UP])
         {
-            m_pUserInputTimer->Start();
-            mMenuOptions[mActiveMenuOption]->VSetFocus(false);
-            mMenuOptions[mActiveMenuOption]->VUpdate();
-            mActiveMenuOption = (mActiveMenuOption - 1) % mMenuOptions.size();
+            if (mMenuOptions[(mActiveMenuOption - 1) % mMenuOptions.size()]->VIsFocusable())
+            {
+                m_pUserInputTimer->Start();
+                mMenuOptions[mActiveMenuOption]->VSetFocus(false);
+                mMenuOptions[mActiveMenuOption]->VUpdate();
+                mActiveMenuOption = (mActiveMenuOption - 1) % mMenuOptions.size();
+            }
         }
         
         mMenuOptions[mActiveMenuOption]->VSetFocus(true);
