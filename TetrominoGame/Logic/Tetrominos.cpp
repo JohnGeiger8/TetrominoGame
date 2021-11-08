@@ -303,22 +303,22 @@ const std::vector<SDL_Color> tetrominoColors =
     },
     };
 
-    const int GetBlockType(Tetromino tetromino, Rotation rotation, int x, int y)
+    const int GetBlockType(TetrominoType tetromino, Rotation rotation, int x, int y)
     {
         return mTetrominos[tetromino][rotation][x][y];
     }
 
-    const SDL_Color GetTetrominoColor(Tetromino tetromino)
+    const SDL_Color GetTetrominoColor(TetrominoType tetromino)
     {
         return tetrominoColors[tetromino + 1];
     }
 
-    const int GetInitialPositionX(Tetromino tetromino, Rotation rotation)
+    const int GetInitialPositionX(TetrominoType tetromino, Rotation rotation)
     {
         return mTetrominosInitialPosition[tetromino][rotation][0];
     }
 
-    const int GetInitialPositionY(Tetromino tetromino, Rotation rotation)
+    const int GetInitialPositionY(TetrominoType tetromino, Rotation rotation)
     {
         return mTetrominosInitialPosition[tetromino][rotation][1];
     }

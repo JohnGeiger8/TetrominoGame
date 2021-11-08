@@ -6,22 +6,26 @@
 //
 
 #include "TetrominoView.hpp"
+#include "CVar.hpp"
 #include "SDLRenderer.hpp"
 
 TetrominoView::TetrominoView()
 {
     m_pBoard = NULL;
+    m_pTetromino = NULL;
+    m_pStashedTetromino = NULL;
+    m_pNextTetrominos = NULL;
     m_pFonts = std::vector<TTF_Font*>();
 }
 
 //
-// Initialize the systems of the Tetromino View
+// Initialize the systems of the Tetromino View, including the board and fonts
 //
 // Input: `pBoard` points to the TetrominoBoard we'll be displaying.
 //
 // Returns: true if successful.
 //
-bool TetrominoView::Init(std::shared_ptr<TetrominoBoard> pBoard)
+bool TetrominoView::VInit(std::shared_ptr<TetrominoBoard> pBoard, TetrominoPointer pTetromino, TetrominoPointer pStashedTetromino, TetrominoList pNextTetrominos)
 {
     bool success = true;
         
@@ -29,6 +33,27 @@ bool TetrominoView::Init(std::shared_ptr<TetrominoBoard> pBoard)
     if (m_pBoard == NULL)
     {
         printf("Board not initialized.");
+        success = false;
+    }
+    
+    m_pTetromino = pTetromino;
+    if (m_pTetromino == NULL)
+    {
+        printf("Tetromino not initialized.");
+        success = false;
+    }
+    
+    m_pStashedTetromino = pStashedTetromino;
+    if (m_pStashedTetromino == NULL)
+    {
+        printf("Stashed Tetromino not initialized.");
+        success = false;
+    }
+    
+    m_pNextTetrominos = pNextTetrominos;
+    if (m_pNextTetrominos == NULL)
+    {
+        printf("Next Tetrominos not initialized.");
         success = false;
     }
     
@@ -40,7 +65,7 @@ bool TetrominoView::Init(std::shared_ptr<TetrominoBoard> pBoard)
 //
 // Close all fonts in use
 //
-void TetrominoView::Shutdown()
+void TetrominoView::VShutdown()
 {
     for (auto it = m_pFonts.begin(); it < m_pFonts.end(); ++it)
     {
@@ -52,11 +77,9 @@ void TetrominoView::Shutdown()
 //
 // Updates the view, looping through the board and drawing everything
 //
-void TetrominoView::Update()
+void TetrominoView::VUpdate()
 {
-    // Clear screen
-    SDL_SetRenderDrawColor(g_pRenderer->GetRenderer(), 0x00, 0x00, 0x00, 0x00);
-    SDL_RenderClear(g_pRenderer->GetRenderer());
+//    VRender();
 }
 
 //
@@ -79,6 +102,60 @@ void TetrominoView::DrawRectangle(int xPositionPixels, int yPositionPixels, int 
 }
 
 //
+// Draws the given piece at the given position
+//
+// Input: `x` and `y` represent the position the piece is being drawn to.
+//        `tetromino` and `rotation` represent the piece we're drawing.
+//
+void TetrominoView::DrawPiece(int x, int y, TetrominoType tetromino, Rotation rotation)
+{
+    for (int boardX = x, tetrominoX = 0; boardX < x + PIECE_BLOCKS; boardX++, tetrominoX++)
+    {
+        for (int boardY = y, tetrominoY = 0; boardY < y + PIECE_BLOCKS; boardY++, tetrominoY++)
+        {
+            if (Tetrominos::GetBlockType(tetromino, rotation, tetrominoY, tetrominoX) != 0)
+            {
+                int xPositionPixels = m_pBoard->GetXPositionInPixels(boardX);
+                int yPositionPixels = m_pBoard->GetYPositionInPixels(boardY);
+                DrawRectangle(xPositionPixels + 1, yPositionPixels + 1, BLOCK_SIZE - 1, BLOCK_SIZE - 1, Tetrominos::GetTetrominoColor(tetromino));
+            }
+        }
+    }
+}
+
+//
+// Draw the Tetromino board
+//
+void TetrominoView::DrawBoard()
+{
+    int screenHeight = g_cvars.find("screenHeight")->second.GetIntValue();
+
+    // Calculate the limits of the board in pixels
+    int leftBorderX = m_pBoard->GetBoardPositionInPixels() - (BLOCK_SIZE * (BOARD_WIDTH / 2)) - 1;
+    int rightBorderX = m_pBoard->GetBoardPositionInPixels() + (BLOCK_SIZE * (BOARD_WIDTH / 2));
+    int borderY = screenHeight - (BLOCK_SIZE * BOARD_HEIGHT);
+
+    // Rectangles that delimit the board
+    SDL_Color blue = {0x00, 0x00, 0xFF, 0xFF};
+    DrawRectangle(leftBorderX - m_pBoard->GetBorderWidthInPixels(), borderY, m_pBoard->GetBorderWidthInPixels(), screenHeight - 1, blue);
+    DrawRectangle(rightBorderX, borderY, m_pBoard->GetBorderWidthInPixels(), screenHeight - 1, blue);
+
+    // Draw blocks stored in board
+    for (int i = 0; i < BOARD_WIDTH; ++i)
+    {
+        for (int j = 0; j < BOARD_HEIGHT; ++j)
+        {
+            if (!m_pBoard->IsBlockFree(i, j))
+            {
+                int xPositionPixels = m_pBoard->GetXPositionInPixels(i);
+                int yPositionPixels = m_pBoard->GetYPositionInPixels(j);
+                DrawRectangle(xPositionPixels + 1, yPositionPixels + 1, BLOCK_SIZE - 1, BLOCK_SIZE - 1, Tetrominos::GetTetrominoColor(m_pBoard->GetBlockType(i, j)));
+            }
+        }
+    }
+}
+
+//
 // Draws text
 //
 // Input: `text` is the string to be drawn.
@@ -88,7 +165,7 @@ void TetrominoView::DrawRectangle(int xPositionPixels, int yPositionPixels, int 
 //        `fontPath` is the path to the font to be used for drawing.
 //        The final three parameters are optional.
 //
-void TetrominoView::DrawText(std::string text, SDL_Rect* renderRectangle, SDL_Color textColor, int fontSize, std::string fontPath)
+void TetrominoView::VDrawText(std::string text, SDL_Rect* renderRectangle, SDL_Color textColor, int fontSize, std::string fontPath)
 {
     int w, h;
     TTF_Font* pFont;
@@ -142,7 +219,40 @@ void TetrominoView::DrawText(std::string text, SDL_Rect* renderRectangle, SDL_Co
 //
 // Present everything drawn
 //
-void TetrominoView::Render()
+void TetrominoView::VRender()
 {
+    int screenHeight = g_cvars.find("screenHeight")->second.GetIntValue();
+    int screenWidth = g_cvars.find("screenWidth")->second.GetIntValue();
+    int playerScore = g_cvars.find("playerScore")->second.GetIntValue();
+
+    SDL_Rect titleRectangle = { screenWidth / 2, 10, 100, 100 };
+    SDL_Rect scoreTextRectangle = { screenWidth / 2, 120, 100, 100 };
+    SDL_Rect scoreRectangle = { scoreTextRectangle.x, scoreTextRectangle.y + 35, 100, 100 };
+    SDL_Rect stashRectangle = { m_pBoard->GetBoardPositionInPixels() - (BOARD_WIDTH / 2) - 140, screenHeight - (BLOCK_SIZE * BOARD_HEIGHT), 100, 100 };
+    SDL_Color textColor = { 0x00, 0xFF, 0xFF, 0xFF };
+    
+    // Clear screen
+    SDL_SetRenderDrawColor(g_pRenderer->GetRenderer(), 0x00, 0x00, 0x00, 0x00);
+    SDL_RenderClear(g_pRenderer->GetRenderer());
+    
+    // Draw Board and pieces
+    DrawBoard();
+    DrawPiece(m_pTetromino->GetXPosition(), m_pTetromino->GetYPosition(), m_pTetromino->GetType(), m_pTetromino->GetRotation());
+    
+    // Draw next 3 pieces on right side of board
+    for (int i = 0; i < NUMBER_PREVIEW_PIECES; ++i)
+    {
+        DrawPiece(m_pNextTetrominos->at(i)->GetXPosition(), m_pNextTetrominos->at(i)->GetYPosition(), m_pNextTetrominos->at(i)->GetType(), m_pNextTetrominos->at(i)->GetRotation());
+    }
+    
+    // Draw stashed piece on left side of board
+    VDrawText("S  to  stash", &stashRectangle, textColor, 16);
+    if (m_pStashedTetromino->GetType() != -1)
+        DrawPiece( -PIECE_BLOCKS - 1, 2, m_pStashedTetromino->GetType(), m_pStashedTetromino->GetRotation());
+    
+    VDrawText("BLOCK  DROPPER", &titleRectangle, textColor, 48);
+    VDrawText("Score", &scoreTextRectangle, textColor, 32);
+    VDrawText(std::to_string(playerScore), &scoreRectangle, textColor, 32);
+    
     SDL_RenderPresent(g_pRenderer->GetRenderer());
 }

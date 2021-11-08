@@ -18,8 +18,6 @@ public:
     ScreenElementList mScreenElements;
     std::shared_ptr<IKeyboardHandler> mKeyboardHandler;
 
-    SDL_Renderer* m_pRenderer;
-
     HumanView();
     ~HumanView();
     

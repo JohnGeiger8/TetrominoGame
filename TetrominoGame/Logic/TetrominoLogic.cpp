@@ -6,6 +6,7 @@
 //
 
 #include "TetrominoLogic.hpp"
+#include "CVar.hpp"
 
 //
 // Creates TetrominoLogic with given screen height
@@ -27,19 +28,12 @@ TetrominoLogic::TetrominoLogic(GameOptions options)
     mOptions = options;
     mDropTime = PIECE_DROP_START_TIME;
     mPlayerLevel = 1;
+    CVar gPlayerScore = CVar("playerScore", 0, 0, "Player's current score", CVAR_INTEGER);
     mPlayerScore = 0;
     
-    mNextXPositions = { };
-    mNextYPositions = { };
-    mNextTetrominos = { };
-    mNextRotations = { };
-    
-    mXPosition = 0; mYPosition = 0;
-    mTetromino = 0;
-    mRotation = 0;
-    
-    mStashedTetromino = -1; // No tetromino there yet
-    mStashedRotation = -1;
+    mNextTetrominos = NULL;
+    m_pTetromino = NULL;
+    m_pStashedTetromino = NULL;
 }
 
 //
@@ -59,23 +53,22 @@ bool TetrominoLogic::Init()
     
     // Initialize the tetrominos
     srand((unsigned int) time(NULL));
-    mTetromino = GetRandomNumber(0, 6);
-    mRotation = GetRandomNumber(0, 3);
-    mXPosition = (BOARD_WIDTH / 2) + Tetrominos::GetInitialPositionX(mTetromino, mRotation);
-    mYPosition = Tetrominos::GetInitialPositionY(mTetromino, mRotation);
+    m_pTetromino = std::make_shared<Tetromino>(GetRandomNumber(0, 6), GetRandomNumber(0, 3));
+    m_pTetromino->SetX((BOARD_WIDTH / 2) + Tetrominos::GetInitialPositionX(m_pTetromino->GetType(), m_pTetromino->GetRotation()));
+    m_pTetromino->SetY(Tetrominos::GetInitialPositionY(m_pTetromino->GetType(), m_pTetromino->GetRotation()));
+    
+    m_pStashedTetromino = std::make_shared<Tetromino>(0, 0);
     
     // Next pieces
+    mNextTetrominos = std::make_shared<std::deque<TetrominoPointer>>();
     for (int i = 0; i < NUMBER_PREVIEW_PIECES; ++i)
     {
-        mNextTetrominos.push_back(GetRandomNumber(0, 6));
-        mNextRotations.push_back(GetRandomNumber(0, 3));
-        mNextXPositions.push_back(BOARD_WIDTH + 5);
-        mNextYPositions.push_back(i * PIECE_BLOCKS);
+        mNextTetrominos->push_back(std::make_shared<Tetromino>(GetRandomNumber(0, 6), GetRandomNumber(0, 3)));
     }
         
     // Initialize Game View
     m_pGameView = std::make_shared<TetrominoView>();
-    if (!m_pGameView->Init(m_pBoard))
+    if (!m_pGameView->VInit(m_pBoard, m_pTetromino, m_pStashedTetromino, mNextTetrominos))
     {
         printf("Error: Game View Initialization failed.");
         return false;
@@ -98,8 +91,14 @@ bool TetrominoLogic::Init()
 //
 void TetrominoLogic::Shutdown()
 {
-    m_pGameView->Shutdown();
+    m_pGameView->VShutdown();
+    m_pGameView = NULL;
     
+    mNextTetrominos->clear();
+    mNextTetrominos = NULL;
+    m_pTetromino = NULL;
+    m_pStashedTetromino = NULL;
+      
     m_pGameSessionTimer->Stop();
     m_pTetrominoMovementTimer->Stop();
     mGameCycleTimer->Stop();
@@ -124,18 +123,18 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
             
             if (keyStates[SDL_SCANCODE_LEFT])
             {
-                if (m_pBoard->IsPossibleMovement(mXPosition - 1, mYPosition, mTetromino, mRotation))
-                    mXPosition--;
+                if (m_pBoard->IsPossibleMovement(m_pTetromino->GetXPosition() - 1, m_pTetromino->GetYPosition(), m_pTetromino->GetType(), m_pTetromino->GetRotation()))
+                    m_pTetromino->SetX(m_pTetromino->GetXPosition() - 1);
             }
             else if (keyStates[SDL_SCANCODE_RIGHT])
             {
-                if (m_pBoard->IsPossibleMovement(mXPosition + 1, mYPosition, mTetromino, mRotation))
-                    mXPosition++;
+                if (m_pBoard->IsPossibleMovement(m_pTetromino->GetXPosition() + 1, m_pTetromino->GetYPosition(), m_pTetromino->GetType(), m_pTetromino->GetRotation()))
+                    m_pTetromino->SetX(m_pTetromino->GetXPosition() + 1);
             }
             else if (keyStates[SDL_SCANCODE_DOWN])
             {
-                if (m_pBoard->IsPossibleMovement(mXPosition, mYPosition + 1, mTetromino, mRotation))
-                    mYPosition++;
+                if (m_pBoard->IsPossibleMovement(m_pTetromino->GetXPosition(), m_pTetromino->GetYPosition() + 1, m_pTetromino->GetType(), m_pTetromino->GetRotation()))
+                    m_pTetromino->SetY(m_pTetromino->GetYPosition() + 1);
             }
             else if (keyStates[SDL_SCANCODE_S])
             {
@@ -147,25 +146,25 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
             }
             else if (keyStates[SDL_SCANCODE_X])
             {
-                // If the piece already can't go down, the gamecycletimer shouldn't reset
-                if (m_pBoard->IsPossibleMovement(mXPosition, mYPosition + 1, mTetromino, mRotation))
+                // If the piece already can't go down, the mGameCycleTimer shouldn't reset
+                if (m_pBoard->IsPossibleMovement(m_pTetromino->GetXPosition(), m_pTetromino->GetYPosition() + 1, m_pTetromino->GetType(), m_pTetromino->GetRotation()))
                 {
                     // Move piece straight down
-                    while (m_pBoard->IsPossibleMovement(mXPosition, mYPosition + 1, mTetromino, mRotation))
+                    while (m_pBoard->IsPossibleMovement(m_pTetromino->GetXPosition(), m_pTetromino->GetYPosition() + 1, m_pTetromino->GetType(), m_pTetromino->GetRotation()))
                     {
-                        mYPosition++;
+                        m_pTetromino->SetY(m_pTetromino->GetYPosition() + 1);
                     }
                     
                     // Restart game cycle to give user a chance to move piece sideways
-                    mGameCycleTimer->Start(); // FIXME: bug: user can spam x to avoid timer restarting
+                    mGameCycleTimer->Start();
                     OnRender();
                     return;
                 }
             }
             else if (keyStates[SDL_SCANCODE_Z])
             {
-                if (m_pBoard->IsPossibleMovement(mXPosition, mYPosition, mTetromino, (mRotation + 1) % 4))
-                    mRotation = (mRotation + 1) % 4;
+                if (m_pBoard->IsPossibleMovement(m_pTetromino->GetXPosition(), m_pTetromino->GetYPosition(), m_pTetromino->GetType(), (m_pTetromino->GetRotation() + 1) % 4))
+                    m_pTetromino->SetRotation((m_pTetromino->GetRotation() + 1) % 4);
             }
             else if (keyStates[SDL_SCANCODE_P])
             {
@@ -193,9 +192,9 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
 
         if (time >= mDropTime) // Move the piece down if possible
         {
-            if (m_pBoard->IsPossibleMovement(mXPosition, mYPosition + 1, mTetromino, mRotation))
+            if (m_pBoard->IsPossibleMovement(m_pTetromino->GetXPosition(), m_pTetromino->GetYPosition() + 1, m_pTetromino->GetType(), m_pTetromino->GetRotation()))
             {
-                mYPosition++;
+                m_pTetromino->SetY(m_pTetromino->GetYPosition() + 1);
                 mGameCycleTimer->Start();
             }
             else
@@ -212,31 +211,7 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
 //
 void TetrominoLogic::OnRender()
 {
-    SDL_Rect titleRectangle = { mOptions.mScreenWidth / 2, 10, 100, 100 };
-    SDL_Rect scoreTextRectangle = { mOptions.mScreenWidth / 2, 120, 100, 100 };
-    SDL_Rect scoreRectangle = { scoreTextRectangle.x, scoreTextRectangle.y + 35, 100, 100 };
-    SDL_Rect stashRectangle = { m_pBoard->GetBoardPositionInPixels() - (BOARD_WIDTH / 2) - 140, mOptions.mScreenHeight - (BLOCK_SIZE * BOARD_HEIGHT), 100, 100 };
-    SDL_Color textColor = { 0x00, 0xFF, 0xFF, 0xFF };
-    
-    m_pGameView->Update();
-    DrawBoard();
-    DrawPiece(mXPosition, mYPosition, mTetromino, mRotation);
-    
-    // Draw next 3 pieces on right side of board
-    for (int i = 0; i < NUMBER_PREVIEW_PIECES; ++i)
-    {
-        DrawPiece(mNextXPositions[i], mNextYPositions[i], mNextTetrominos[i], mNextRotations[i]);
-    }
-    
-    // Draw stashed piece on left side of board
-    m_pGameView->DrawText("S  to  stash", &stashRectangle, textColor, 16);
-    if (mStashedTetromino != -1)
-        DrawPiece( -PIECE_BLOCKS - 1, 2, mStashedTetromino, mStashedRotation);
-    
-    m_pGameView->DrawText("BLOCK  DROPPER", &titleRectangle, textColor, 48);
-    m_pGameView->DrawText("Score", &scoreTextRectangle, textColor, 32);
-    m_pGameView->DrawText(std::to_string(mPlayerScore), &scoreRectangle, textColor, 32);
-    m_pGameView->Render();
+    m_pGameView->VRender();
 }
 
 //
@@ -244,12 +219,13 @@ void TetrominoLogic::OnRender()
 //
 void TetrominoLogic::StoreTetrominoAndReset()
 {
-    m_pBoard->StoreTetromino(mXPosition, mYPosition, mTetromino, mRotation);
+    m_pBoard->StoreTetromino(m_pTetromino->GetXPosition(), m_pTetromino->GetYPosition(), m_pTetromino->GetType(), m_pTetromino->GetRotation());
     
     UpdateScore(m_pBoard->DeletePossibleLines());
     
     if (m_pBoard->IsGameOver())
     {
+        // FIXME: display game over view here (preferably modally)
         Shutdown();
         return;
     }
@@ -264,10 +240,9 @@ void TetrominoLogic::StoreTetrominoAndReset()
 //
 void TetrominoLogic::StashTetromino()
 {
-    if (mStashedTetromino == -1)
+    if (m_pStashedTetromino->GetType() == -1)
     {
-        mStashedTetromino = mTetromino;
-        mStashedRotation = mRotation;
+        m_pStashedTetromino->SetTetromino(m_pTetromino->GetType());
         
         // Need to create a new piece to replace stashed piece
         CreateNewTetromino();
@@ -275,15 +250,12 @@ void TetrominoLogic::StashTetromino()
     else
     {
         // Swap the current with the stashed tetromino
-        Tetromino tempTetromino = mStashedTetromino;
-        Rotation tempRotation = mStashedRotation;
-        mStashedTetromino = mTetromino;
-        mStashedRotation = mRotation;
-        mTetromino = tempTetromino;
-        mRotation = tempRotation;
+        TetrominoPointer tempTetromino = m_pStashedTetromino;
+        m_pStashedTetromino = m_pTetromino;
+        m_pTetromino = tempTetromino;
         
-        mXPosition = (BOARD_WIDTH / 2) + Tetrominos::GetInitialPositionX(mTetromino, mRotation);
-        mYPosition = Tetrominos::GetInitialPositionY(mTetromino, mRotation);
+        m_pTetromino->SetX((BOARD_WIDTH / 2) + Tetrominos::GetInitialPositionX(m_pTetromino->GetType(), m_pTetromino->GetRotation()));
+        m_pTetromino->SetY(Tetrominos::GetInitialPositionY(m_pTetromino->GetType(), m_pTetromino->GetRotation()));
     }
     
     mGameCycleTimer->Start();
@@ -314,6 +286,10 @@ void TetrominoLogic::UpdateScore(int numberDeletedLines)
             mPlayerScore += mPlayerLevel * 1200;
             break;
     }
+    CVar g_playerScore = g_cvars.find("playerScore")->second;
+    g_playerScore.SetIntValue(mPlayerScore);
+    g_cvars.erase("playerScore");
+    g_cvars.insert(pair<std::string, CVar>("playerScore", g_playerScore));
     
     mTotalNumberLinesDeleted += numberDeletedLines;
     
@@ -331,16 +307,13 @@ void TetrominoLogic::UpdateScore(int numberDeletedLines)
 void TetrominoLogic::CreateNewTetromino()
 {
     // New Tetromino
-    mTetromino = mNextTetrominos.front();
-    mNextTetrominos.pop_front();
-    mRotation = mNextRotations.front();
-    mNextRotations.pop_front();
-    mXPosition = (BOARD_WIDTH / 2) + Tetrominos::GetInitialPositionX(mTetromino, mRotation);
-    mYPosition = Tetrominos::GetInitialPositionY(mTetromino, mRotation);
+    m_pTetromino = mNextTetrominos->front();
+    mNextTetrominos->pop_front();
+    m_pTetromino->SetX((BOARD_WIDTH / 2) + Tetrominos::GetInitialPositionX(m_pTetromino->GetType(), m_pTetromino->GetRotation()));
+    m_pTetromino->SetY(Tetrominos::GetInitialPositionY(m_pTetromino->GetType(), m_pTetromino->GetRotation()));
     
     // Next tetromino
-    mNextTetrominos.push_back(GetRandomNumber(0, 6));
-    mNextRotations.push_back(GetRandomNumber(0, 3));
+    mNextTetrominos->push_back(std::make_shared<Tetromino>(GetRandomNumber(0, 6), GetRandomNumber(0, 3)));
 }
 
 //
@@ -348,51 +321,7 @@ void TetrominoLogic::CreateNewTetromino()
 //
 void TetrominoLogic::DrawBoard()
 {
-    // Calculate the limits of the board in pixels
-    int leftBorderX = m_pBoard->GetBoardPositionInPixels() - (BLOCK_SIZE * (BOARD_WIDTH / 2)) - 1;
-    int rightBorderX = m_pBoard->GetBoardPositionInPixels() + (BLOCK_SIZE * (BOARD_WIDTH / 2));
-    int borderY = mOptions.mScreenHeight - (BLOCK_SIZE * BOARD_HEIGHT);
-
-    // Rectangles that delimit the board
-    SDL_Color blue = {0x00, 0x00, 0xFF, 0xFF};
-    m_pGameView->DrawRectangle(leftBorderX - m_pBoard->GetBorderWidthInPixels(), borderY, m_pBoard->GetBorderWidthInPixels(), mOptions.mScreenHeight - 1, blue);
-    m_pGameView->DrawRectangle(rightBorderX, borderY, m_pBoard->GetBorderWidthInPixels(), mOptions.mScreenHeight - 1, blue);
-
-    // Draw blocks stored in board
-    for (int i = 0; i < BOARD_WIDTH; ++i)
-    {
-        for (int j = 0; j < BOARD_HEIGHT; ++j)
-        {
-            if (!m_pBoard->IsBlockFree(i, j))
-            {
-                int xPositionPixels = m_pBoard->GetXPositionInPixels(i);
-                int yPositionPixels = m_pBoard->GetYPositionInPixels(j);
-                m_pGameView->DrawRectangle(xPositionPixels + 1, yPositionPixels + 1, BLOCK_SIZE - 1, BLOCK_SIZE - 1, Tetrominos::GetTetrominoColor(m_pBoard->GetBlockType(i, j)));
-            }
-        }
-    }
-}
-
-//
-// Draws the given piece at the given position
-//
-// Input: `x` and `y` represent the position the piece is being drawn to.
-//        `tetromino` and `rotation` represent the piece we're drawing.
-//
-void TetrominoLogic::DrawPiece(int x, int y, Tetromino tetromino, Rotation rotation)
-{
-    for (int boardX = x, tetrominoX = 0; boardX < x + PIECE_BLOCKS; boardX++, tetrominoX++)
-    {
-        for (int boardY = y, tetrominoY = 0; boardY < y + PIECE_BLOCKS; boardY++, tetrominoY++)
-        {
-            if (Tetrominos::GetBlockType(tetromino, rotation, tetrominoY, tetrominoX) != 0)
-            {
-                int xPositionPixels = m_pBoard->GetXPositionInPixels(boardX);
-                int yPositionPixels = m_pBoard->GetYPositionInPixels(boardY);
-                m_pGameView->DrawRectangle(xPositionPixels + 1, yPositionPixels + 1, BLOCK_SIZE - 1, BLOCK_SIZE - 1, Tetrominos::GetTetrominoColor(tetromino));
-            }
-        }
-    }
+    m_pGameView->DrawBoard();
 }
 
 //

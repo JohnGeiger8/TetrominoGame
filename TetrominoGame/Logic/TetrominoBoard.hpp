@@ -35,9 +35,9 @@ public:
     int GetBoardPositionInPixels() { return mBoardPosition; };
     
     bool IsBlockFree(int x, int y);
-    bool IsPossibleMovement(int x, int y, Tetromino tetromino, Rotation rotation);
+    bool IsPossibleMovement(int x, int y, TetrominoType tetromino, Rotation rotation);
     
-    void StoreTetromino(int x, int y, Tetromino tetromino, Rotation rotation);
+    void StoreTetromino(int x, int y, TetrominoType tetromino, Rotation rotation);
     const int GetBlockType(int x, int y);
     
     int DeletePossibleLines();

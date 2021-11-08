@@ -11,24 +11,32 @@
 
 HumanView::HumanView()
 {
-    mScreenElements = ScreenElementList();
+//    mScreenElements = NULL;
 }
 
 HumanView::~HumanView()
 {
-    mScreenElements.clear();
 }
 
+//
+// Initialize screen element list
+//
 bool HumanView::VInit()
 {
     bool successful = true;
     
+    mScreenElements = ScreenElementList();
+    
     return successful;
 }
 
+//
+// Clears all elements or sets to null
+//
 void HumanView::VShutdown()
 {
     mScreenElements.clear();
+    mKeyboardHandler = NULL;
 }
 
 
@@ -63,7 +71,7 @@ void HumanView::VRender()
 //
 // Draw text
 //
-// FIXME: how to properly use this?
+// FIXME: how to properly use this? this implementation isn't really right anyway, need to close font somewhere
 //
 void HumanView::VDrawText(std::string text, SDL_Rect* renderRectangle, SDL_Color textColor, int fontSize, std::string fontPath)
 {
@@ -129,6 +137,10 @@ void HumanView::VProcessMessages(SDL_Event* pEvent)
         case SDL_KEYUP:
             if (mKeyboardHandler)
                 mKeyboardHandler->VOnKeyUp(pEvent->key.keysym.sym);
+            break;
+            
+        case SDL_QUIT:
+            VShutdown();
             break;
             
         default:

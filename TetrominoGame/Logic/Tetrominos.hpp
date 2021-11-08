@@ -12,7 +12,7 @@
 #include <vector>
 #include <SDL2/SDL.h>
 
-using Tetromino = int;
+using TetrominoType = int;
 using Rotation = int;
 using TetrominosMatrix = std::vector<std::vector<std::vector<std::vector<int>>>>;
 using InitialPositionsMatrix = std::vector<std::vector<std::vector<int>>>;
@@ -22,10 +22,10 @@ using InitialPositionsMatrix = std::vector<std::vector<std::vector<int>>>;
 //
 namespace Tetrominos
 {
-    const int GetBlockType(Tetromino tetromino, Rotation rotation, int x, int y);
-    const SDL_Color GetTetrominoColor(Tetromino tetromino);
-    const int GetInitialPositionX(Tetromino tetromino, Rotation rotation);
-    const int GetInitialPositionY(Tetromino tetromino, Rotation rotation);
+    const int GetBlockType(TetrominoType tetromino, Rotation rotation, int x, int y);
+    const SDL_Color GetTetrominoColor(TetrominoType tetromino);
+    const int GetInitialPositionX(TetrominoType tetromino, Rotation rotation);
+    const int GetInitialPositionY(TetrominoType tetromino, Rotation rotation);
 };
 
 #endif /* Tetrominos_hpp */

@@ -72,7 +72,7 @@ const int TetrominoBoard::GetBlockType(int x, int y)
 // Input: `tetromino` and `rotation` describe the piece being moved. `x` and `y` represent
 //        the position the piece is moving to.
 //
-bool TetrominoBoard::IsPossibleMovement(int x, int y, Tetromino tetromino, Rotation rotation)
+bool TetrominoBoard::IsPossibleMovement(int x, int y, TetrominoType tetromino, Rotation rotation)
 {
     // tetrominoX tracks position within tetromino piece; boardX tracks actual board position
     for (int boardX = x, tetrominoX = 0; boardX < x + PIECE_BLOCKS; boardX++, tetrominoX++)
@@ -105,7 +105,7 @@ bool TetrominoBoard::IsPossibleMovement(int x, int y, Tetromino tetromino, Rotat
 //        `y` represents the y position of where the tetromino is going.
 //        `tetromino` is the tetromino we're storing, and `rotation` is its rotation.
 //
-void TetrominoBoard::StoreTetromino(int x, int y, Tetromino tetromino, Rotation rotation)
+void TetrominoBoard::StoreTetromino(int x, int y, TetrominoType tetromino, Rotation rotation)
 {
     // Store each block of the piece into the board
     for (int i = x, tetrominoY = 0; i < x + PIECE_BLOCKS; ++i, ++tetrominoY)
