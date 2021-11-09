@@ -57,13 +57,16 @@ bool TetrominoLogic::Init()
     m_pTetromino->SetX((BOARD_WIDTH / 2) + Tetrominos::GetInitialPositionX(m_pTetromino->GetType(), m_pTetromino->GetRotation()));
     m_pTetromino->SetY(Tetrominos::GetInitialPositionY(m_pTetromino->GetType(), m_pTetromino->GetRotation()));
     
-    m_pStashedTetromino = std::make_shared<Tetromino>(0, 0);
+    m_pStashedTetromino = std::make_shared<Tetromino>(-1, -1);
     
     // Next pieces
     mNextTetrominos = std::make_shared<std::deque<TetrominoPointer>>();
     for (int i = 0; i < NUMBER_PREVIEW_PIECES; ++i)
     {
-        mNextTetrominos->push_back(std::make_shared<Tetromino>(GetRandomNumber(0, 6), GetRandomNumber(0, 3)));
+        TetrominoPointer pNextTetromino = std::make_shared<Tetromino>(GetRandomNumber(0, 6), GetRandomNumber(0, 3));
+        pNextTetromino->SetY(i * PIECE_BLOCKS);
+        pNextTetromino->SetX(BOARD_WIDTH + 5);
+        mNextTetrominos->push_back(pNextTetromino);
     }
         
     // Initialize Game View
@@ -243,6 +246,7 @@ void TetrominoLogic::StashTetromino()
     if (m_pStashedTetromino->GetType() == -1)
     {
         m_pStashedTetromino->SetTetromino(m_pTetromino->GetType());
+        m_pStashedTetromino->SetRotation(m_pTetromino->GetRotation());
         
         // Need to create a new piece to replace stashed piece
         CreateNewTetromino();
@@ -250,10 +254,14 @@ void TetrominoLogic::StashTetromino()
     else
     {
         // Swap the current with the stashed tetromino
-        TetrominoPointer tempTetromino = m_pStashedTetromino;
-        m_pStashedTetromino = m_pTetromino;
-        m_pTetromino = tempTetromino;
+        TetrominoType stashedType = m_pStashedTetromino->GetType();
+        Rotation stashedRotation = m_pStashedTetromino->GetRotation();
         
+        m_pStashedTetromino->SetTetromino(m_pTetromino->GetType());
+        m_pStashedTetromino->SetRotation(m_pTetromino->GetRotation());
+        
+        m_pTetromino->SetTetromino(stashedType);
+        m_pTetromino->SetRotation(stashedRotation);
         m_pTetromino->SetX((BOARD_WIDTH / 2) + Tetrominos::GetInitialPositionX(m_pTetromino->GetType(), m_pTetromino->GetRotation()));
         m_pTetromino->SetY(Tetrominos::GetInitialPositionY(m_pTetromino->GetType(), m_pTetromino->GetRotation()));
     }
@@ -307,13 +315,22 @@ void TetrominoLogic::UpdateScore(int numberDeletedLines)
 void TetrominoLogic::CreateNewTetromino()
 {
     // New Tetromino
-    m_pTetromino = mNextTetrominos->front();
-    mNextTetrominos->pop_front();
+    m_pTetromino->SetTetromino(mNextTetrominos->front()->GetType());
+    m_pTetromino->SetRotation(mNextTetrominos->front()->GetRotation());
     m_pTetromino->SetX((BOARD_WIDTH / 2) + Tetrominos::GetInitialPositionX(m_pTetromino->GetType(), m_pTetromino->GetRotation()));
     m_pTetromino->SetY(Tetrominos::GetInitialPositionY(m_pTetromino->GetType(), m_pTetromino->GetRotation()));
     
-    // Next tetromino
-    mNextTetrominos->push_back(std::make_shared<Tetromino>(GetRandomNumber(0, 6), GetRandomNumber(0, 3)));
+    // Next tetrominos update
+    mNextTetrominos->pop_front();
+    for (TetrominoPointer pTetromino : *mNextTetrominos)
+    {
+        pTetromino->SetY(pTetromino->GetYPosition() - PIECE_BLOCKS);
+    }
+    
+    TetrominoPointer pNextTetromino = std::make_shared<Tetromino>(GetRandomNumber(0, 6), GetRandomNumber(0, 3));
+    pNextTetromino->SetY(2 * PIECE_BLOCKS);
+    pNextTetromino->SetX(BOARD_WIDTH + 5);
+    mNextTetrominos->push_back(pNextTetromino);
 }
 
 //
