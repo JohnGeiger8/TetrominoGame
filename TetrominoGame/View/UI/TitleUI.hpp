@@ -26,7 +26,7 @@ public:
     TitleUI(std::string text, int fontSize = 24, SDL_Color color = {0xFF, 0xFF, 0xFF});
     ~TitleUI();
     
-    virtual void VSetTitle(std::string text) { mTitle = text; };
+    virtual void VSetTitle(std::string text) { mTitle = text; m_pTextTexture->ChangeText(text); };
     virtual void VSetColor(SDL_Color color) { mColor = color; };
     
     virtual std::string VGetTitle() { return mTitle; };

@@ -207,6 +207,8 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
             OnRender();
         }
     }
+    
+    m_pGameView->VUpdate();
 }
 
 //

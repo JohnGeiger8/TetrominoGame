@@ -15,11 +15,12 @@ TetrominoView::TetrominoView()
     m_pTetromino = NULL;
     m_pStashedTetromino = NULL;
     m_pNextTetrominos = NULL;
-    m_pFonts = std::vector<TTF_Font*>();
+    m_pScoreUI = NULL;
+    mPlayerScore = 0;
 }
 
 //
-// Initialize the systems of the Tetromino View, including the board and fonts
+// Initialize the systems of the Tetromino View, including the board
 //
 // Input: `pBoard` points to the TetrominoBoard we'll be displaying.
 //
@@ -57,21 +58,41 @@ bool TetrominoView::VInit(std::shared_ptr<TetrominoBoard> pBoard, TetrominoPoint
         success = false;
     }
     
-    mDefaultFontPath = "Assets/ARCADECLASSIC.ttf";
+    // Initialize text UI items
+    int screenHeight = g_cvars.find("screenHeight")->second.GetIntValue();
+    int screenWidth = g_cvars.find("screenWidth")->second.GetIntValue();
+    int playerScore = g_cvars.find("playerScore")->second.GetIntValue();
 
+//    SDL_Rect stashRectangle = { m_pBoard->GetBoardPositionInPixels() - (BOARD_WIDTH / 2) - 140, screenHeight - (BLOCK_SIZE * BOARD_HEIGHT), 100, 100 };
+    SDL_Color textColor = { 0x00, 0xFF, 0xFF, 0xFF };
+    std::shared_ptr<TitleUI> pTitleUI = std::make_shared<TitleUI>("BLOCK DROPPER", 48, textColor);
+    std::shared_ptr<TitleUI> pScoreTextUI = std::make_shared<TitleUI>("Score", 32, textColor);
+    m_pScoreUI = std::make_shared<TitleUI>(std::to_string(playerScore), 32, textColor);
+    std::shared_ptr<TitleUI> pStashUI = std::make_shared<TitleUI>("S  to  stash", 16, textColor);
+
+    pTitleUI->VSetPositionX(screenWidth / 2);
+    pTitleUI->VSetPositionY(pTitleUI->VGetHeight() + 15);
+    pScoreTextUI->VSetPositionX(screenWidth / 2);
+    pScoreTextUI->VSetPositionY(120);
+    m_pScoreUI->VSetPositionX(screenWidth / 2);
+    m_pScoreUI->VSetPositionY(pScoreTextUI->VGetPositionY() + 35);
+    pStashUI->VSetPositionX(m_pBoard->GetBoardPositionInPixels() - (BOARD_WIDTH / 2) - 140);
+    pStashUI->VSetPositionY(screenHeight - (BLOCK_SIZE * BOARD_HEIGHT));
+    
+    mScreenElements.push_back(pTitleUI);
+    mScreenElements.push_back(pScoreTextUI);
+    mScreenElements.push_back(m_pScoreUI);
+    mScreenElements.push_back(pStashUI);
+    
     return success;
 }
 
 //
-// Close all fonts in use
+// Reset everything
 //
 void TetrominoView::VShutdown()
 {
-    for (auto it = m_pFonts.begin(); it < m_pFonts.end(); ++it)
-    {
-        TTF_CloseFont(*it);
-    }
-    m_pFonts.clear();
+    mPlayerScore = 0;
 }
 
 //
@@ -79,7 +100,12 @@ void TetrominoView::VShutdown()
 //
 void TetrominoView::VUpdate()
 {
-//    VRender();
+    int playerScore = g_cvars.find("playerScore")->second.GetIntValue();
+    if (playerScore != mPlayerScore)
+    {
+        m_pScoreUI->VSetTitle(std::to_string(playerScore));
+        mPlayerScore = playerScore;
+    }
 }
 
 //
@@ -156,81 +182,10 @@ void TetrominoView::DrawBoard()
 }
 
 //
-// Draws text
-//
-// Input: `text` is the string to be drawn.
-//        `renderRectangle` is the center of where the text should be.
-//        `textColor` is the color of the text to be drawn.
-//        `fontSize` is the font size of the text.
-//        `fontPath` is the path to the font to be used for drawing.
-//        The final three parameters are optional.
-//
-void TetrominoView::VDrawText(std::string text, SDL_Rect* renderRectangle, SDL_Color textColor, int fontSize, std::string fontPath)
-{
-    int w, h;
-    TTF_Font* pFont;
-    
-    // Open the font if given
-    if (fontPath == "")
-        pFont = TTF_OpenFont(mDefaultFontPath.c_str(), fontSize);
-    else
-        pFont = TTF_OpenFont(fontPath.c_str(), fontSize);
-    
-    if (pFont == NULL)
-    {
-        printf("Failed to load font! SDL_ttf Error: %s\n", TTF_GetError());
-        return;
-    }
-    
-    m_pFonts.push_back(pFont);
-    
-    SDL_Surface* textSurface = TTF_RenderText_Blended(pFont, text.c_str(), textColor);
-    if (textSurface == NULL)
-    {
-        printf("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
-        return;
-    }
-    //Color key image
-    SDL_SetColorKey(textSurface, SDL_TRUE, SDL_MapRGB(textSurface->format, 0xFF, 0xFF, 0xFF));
-
-    //Create texture from surface pixels
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(g_pRenderer->GetRenderer(), textSurface);
-    if (texture == NULL)
-    {
-        printf("Unable to create texture from %s! SDL Error: %s\n", text.c_str(), SDL_GetError());
-    }
-    else
-    {
-        w = textSurface->w;
-        h = textSurface->h;
-        SDL_Rect srcRect = { 0, 0, w, h };
-        
-        renderRectangle->h = h;
-        renderRectangle->w = w;
-        renderRectangle->x -= w/2; // Convert center to top left
-        
-        SDL_RenderCopy(g_pRenderer->GetRenderer(), texture, &srcRect, renderRectangle);
-    }
-
-    // Get rid of old loaded surface
-    SDL_FreeSurface(textSurface);
-}
-
-//
 // Present everything drawn
 //
 void TetrominoView::VRender()
 {
-    int screenHeight = g_cvars.find("screenHeight")->second.GetIntValue();
-    int screenWidth = g_cvars.find("screenWidth")->second.GetIntValue();
-    int playerScore = g_cvars.find("playerScore")->second.GetIntValue();
-
-    SDL_Rect titleRectangle = { screenWidth / 2, 10, 100, 100 };
-    SDL_Rect scoreTextRectangle = { screenWidth / 2, 120, 100, 100 };
-    SDL_Rect scoreRectangle = { scoreTextRectangle.x, scoreTextRectangle.y + 35, 100, 100 };
-    SDL_Rect stashRectangle = { m_pBoard->GetBoardPositionInPixels() - (BOARD_WIDTH / 2) - 140, screenHeight - (BLOCK_SIZE * BOARD_HEIGHT), 100, 100 };
-    SDL_Color textColor = { 0x00, 0xFF, 0xFF, 0xFF };
-    
     // Clear screen
     SDL_SetRenderDrawColor(g_pRenderer->GetRenderer(), 0x00, 0x00, 0x00, 0x00);
     SDL_RenderClear(g_pRenderer->GetRenderer());
@@ -246,13 +201,15 @@ void TetrominoView::VRender()
     }
     
     // Draw stashed piece on left side of board
-    VDrawText("S  to  stash", &stashRectangle, textColor, 16);
     if (m_pStashedTetromino->GetType() != -1)
         DrawPiece( -PIECE_BLOCKS - 1, 2, m_pStashedTetromino->GetType(), m_pStashedTetromino->GetRotation());
     
-    VDrawText("BLOCK  DROPPER", &titleRectangle, textColor, 48);
-    VDrawText("Score", &scoreTextRectangle, textColor, 32);
-    VDrawText(std::to_string(playerScore), &scoreRectangle, textColor, 32);
+    // Draw UI and text elements
+    for (ScreenElementPointer &pElement : mScreenElements)
+    {
+        if (pElement->VIsVisible())
+            pElement->VRender();
+    }
     
     SDL_RenderPresent(g_pRenderer->GetRenderer());
 }
