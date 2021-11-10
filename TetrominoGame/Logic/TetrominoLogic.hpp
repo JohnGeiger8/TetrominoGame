@@ -41,8 +41,6 @@ private:
     void StoreTetrominoAndReset();
     void StashTetromino();
     void UpdateScore(int numberDeletedLines);
-    void DrawBoard();
-    void DrawPiece(int x, int y, TetrominoType tetromino, Rotation rotation);
 
     std::shared_ptr<TetrominoBoard> m_pBoard;
     std::shared_ptr<TetrominoView> m_pGameView;

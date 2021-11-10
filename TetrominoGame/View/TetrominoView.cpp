@@ -16,7 +16,13 @@ TetrominoView::TetrominoView()
     m_pStashedTetromino = NULL;
     m_pNextTetrominos = NULL;
     m_pScoreUI = NULL;
+    m_pGameOverUI = NULL;
+    m_pGameOverScoreUI = NULL;
+    m_pRestartButton = NULL;
+    m_pQuitButton = NULL;
+    
     mPlayerScore = 0;
+    m_bGameIsRestarting = false;
 }
 
 //
@@ -79,12 +85,65 @@ bool TetrominoView::VInit(std::shared_ptr<TetrominoBoard> pBoard, TetrominoPoint
     pStashUI->VSetPositionX(m_pBoard->GetBoardPositionInPixels() - (BOARD_WIDTH / 2) - 140);
     pStashUI->VSetPositionY(screenHeight - (BLOCK_SIZE * BOARD_HEIGHT));
     
-    mScreenElements.push_back(pTitleUI);
-    mScreenElements.push_back(pScoreTextUI);
-    mScreenElements.push_back(m_pScoreUI);
-    mScreenElements.push_back(pStashUI);
+    CreateGameOverUI(screenWidth, screenHeight, playerScore);
+   
+    VPushElement(m_pGameOverUI);
+    VPushElement(pTitleUI);
+    VPushElement(pScoreTextUI);
+    VPushElement(m_pScoreUI);
+    VPushElement(pStashUI);
     
     return success;
+}
+
+//
+// Build Game Over UI to be displayed when game ends
+//
+void TetrominoView::CreateGameOverUI(int screenWidth, int screenHeight, int score)
+{
+    SDL_Color titleColor = { 0x00, 0xFF, 0xFF };
+    
+    m_pGameOverUI = std::make_shared<MainMenuUI>();
+    
+    std::shared_ptr<TitleUI> pTitleUI = std::make_shared<TitleUI>("GAME  OVER!", 36, titleColor);
+    m_pGameOverScoreUI = std::make_shared<TitleUI>(std::to_string(mPlayerScore), 28, SDL_Color({0xFF, 0xFF, 0x00}));
+    m_pRestartButton = std::make_shared<MenuButtonUI>("Restart");
+    m_pQuitButton = std::make_shared<MenuButtonUI>("Quit");
+
+    m_pRestartButton->VSetWidth(screenWidth / 3);
+    m_pRestartButton->VSetHeight(85);
+    m_pQuitButton->VSetWidth(screenWidth / 3);
+    m_pQuitButton->VSetHeight(85);
+    
+    m_pGameOverUI->VSetPositionX((screenWidth / 2) - (m_pRestartButton->VGetWidth() / 2) - HORIZONTAL_BUTTON_MARGINS);
+    m_pRestartButton->VSetPositionX(m_pGameOverUI->VGetPositionX() + HORIZONTAL_BUTTON_MARGINS);
+    m_pQuitButton->VSetPositionX(m_pGameOverUI->VGetPositionX() + HORIZONTAL_BUTTON_MARGINS);
+    
+    m_pGameOverUI->VSetWidth(m_pRestartButton->VGetWidth() + 2 * HORIZONTAL_BUTTON_MARGINS);
+    m_pGameOverUI->VSetHeight(m_pRestartButton->VGetHeight() + m_pQuitButton->VGetHeight() + 3 * VERTICAL_BUTTON_MARGINS);
+    m_pGameOverUI->VSetPositionY((screenHeight / 2) - (m_pGameOverUI->VGetHeight() / 2));
+    
+    // Title position should be centered because it's text
+    pTitleUI->VSetPositionX(m_pGameOverUI->VGetPositionX() + m_pGameOverUI->VGetWidth() / 2);
+    pTitleUI->VSetPositionY(m_pGameOverUI->VGetPositionY());
+    m_pGameOverScoreUI->VSetPositionX(pTitleUI->VGetPositionX());
+    m_pGameOverScoreUI->VSetPositionY(pTitleUI->VGetPositionY() + VERTICAL_BUTTON_MARGINS);
+
+    m_pRestartButton->VSetPositionY(m_pGameOverScoreUI->VGetPositionY() + m_pGameOverScoreUI->VGetHeight());
+    m_pQuitButton->VSetPositionY(m_pRestartButton->VGetPositionY() + m_pRestartButton->VGetHeight() + VERTICAL_BUTTON_MARGINS);
+
+    // Colors
+    m_pRestartButton->SetButtonColor({0x00, 0xFF, 0xFF});
+    m_pQuitButton->SetButtonColor({0x00, 0xFF, 0xFF});
+    m_pGameOverUI->SetColor({0x00, 0xFF, 0xFF, 0xFF});
+    
+    m_pGameOverUI->AddMenuOption(pTitleUI);
+    m_pGameOverUI->AddMenuOption(m_pGameOverScoreUI);
+    m_pGameOverUI->AddMenuOption(m_pRestartButton);
+    m_pGameOverUI->AddMenuOption(m_pQuitButton);
+    
+    // Invisible until game ends
+    m_pGameOverUI->VSetVisible(false);
 }
 
 //
@@ -92,7 +151,18 @@ bool TetrominoView::VInit(std::shared_ptr<TetrominoBoard> pBoard, TetrominoPoint
 //
 void TetrominoView::VShutdown()
 {
+    m_pBoard = NULL;
+    m_pTetromino = NULL;
+    m_pStashedTetromino = NULL;
+    m_pNextTetrominos = NULL;
+    m_pScoreUI = NULL;
+    m_pGameOverUI = NULL;
+    m_pGameOverScoreUI = NULL;
+    m_pRestartButton = NULL;
+    m_pQuitButton = NULL;
+    
     mPlayerScore = 0;
+    m_bGameIsRestarting = false;
 }
 
 //
@@ -104,7 +174,29 @@ void TetrominoView::VUpdate()
     if (playerScore != mPlayerScore)
     {
         m_pScoreUI->VSetTitle(std::to_string(playerScore));
+        m_pGameOverScoreUI->VSetTitle(std::to_string(playerScore));
         mPlayerScore = playerScore;
+    }
+    
+    // Game is over
+    if (m_pGameOverUI->VIsVisible())
+    {
+        HumanView::VUpdate();
+        
+        // Restart the game
+        if (m_pRestartButton->VIsSelected())
+        {
+            m_bGameIsRestarting = true;
+        }
+        
+        // Exit the game
+        if (m_pQuitButton->VIsSelected())
+        {
+            CVar g_isQuitting = g_cvars.find("isQuitting")->second;
+            g_isQuitting.SetBoolValue(true);
+            g_cvars.erase("isQuitting");
+            g_cvars.insert(pair<std::string, CVar>("isQuitting", g_isQuitting));
+        }
     }
 }
 
@@ -212,4 +304,9 @@ void TetrominoView::VRender()
     }
     
     SDL_RenderPresent(g_pRenderer->GetRenderer());
+}
+
+void TetrominoView::SetGameIsOver()
+{
+    m_pGameOverUI->VSetVisible(true);
 }

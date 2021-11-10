@@ -44,6 +44,8 @@ public:
     virtual void VUpdate();
     virtual void VRender();
     virtual void VDrawText() { };
+    
+    virtual void VSetVisible(bool visible);
 };
 
 //

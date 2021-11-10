@@ -49,7 +49,6 @@ void HumanView::VUpdate()
     {
         pElement->VUpdate();
     }
-    VRender();
 }
 
 //

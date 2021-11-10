@@ -71,6 +71,7 @@ bool MainMenuView::VInit()
 void MainMenuView::VUpdate()
 {
     HumanView::VUpdate();
+    VRender();
     
     // Start the game
     if (mStartButton->VIsSelected())

@@ -112,9 +112,9 @@ void TetrominoApp::MainLoop()
     SDL_Event event;
     while (!isQuitting)
     {
-        if (SDL_PollEvent(&event) != 0 && !m_pGameLogic->IsGameOver())
+        if (SDL_PollEvent(&event) != 0)
         {
-            if (event.type == SDL_QUIT || m_pGameLogic->IsGameOver() || g_cvars.find("isQuitting")->second.GetBoolValue())
+            if (event.type == SDL_QUIT || g_cvars.find("isQuitting")->second.GetBoolValue())
             {
                 isQuitting = true;
             }

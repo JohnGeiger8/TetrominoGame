@@ -106,14 +106,19 @@ void MainMenuUI::VRender()
     mPositionX = screenWidth / 2 - mWidth / 2;
     mPositionY = screenHeight / 2 - mHeight / 2;
     
-    SDL_Rect menuRect = { mPositionX, mPositionY, mWidth, mHeight };
+    SDL_Rect menuRect = { mPositionX + 1, mPositionY + 1, mWidth - 2, mHeight - 2 };
+    SDL_Rect menuBorderRect = { mPositionX, mPositionY, mWidth, mHeight };
     
+    // Create black background menu with border
+    SDL_SetRenderDrawColor(g_pRenderer->GetRenderer(), 0x00, 0x00, 0x00, 0xFF);
+    SDL_RenderFillRect(g_pRenderer->GetRenderer(), &menuRect);
     SDL_SetRenderDrawColor(g_pRenderer->GetRenderer(), mColor.r, mColor.g, mColor.b, mColor.a);
-    SDL_RenderDrawRect(g_pRenderer->GetRenderer(), &menuRect);
+    SDL_RenderDrawRect(g_pRenderer->GetRenderer(), &menuBorderRect);
     
     for (const UIElementPointer &element : mMenuOptions)
     {
-        element->VRender();
+        if (element->VIsVisible())
+            element->VRender();
     }
 }
 
@@ -121,6 +126,18 @@ void MainMenuUI::AddMenuOption(UIElementPointer screenElement)
 {
     if (screenElement != NULL)
         mMenuOptions.push_back(screenElement);
+}
+
+//
+// Set visibility of menu and its options
+//
+void MainMenuUI::VSetVisible(bool visible)
+{
+    for (const UIElementPointer &element : mMenuOptions)
+    {
+        element->VSetVisible(visible);
+    }
+    m_bIsVisible = visible;
 }
 
 void MainMenuUI::RemoveMenuOption(UIElementPointer screenElement)

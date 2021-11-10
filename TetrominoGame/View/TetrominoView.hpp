@@ -16,6 +16,7 @@
 #include "TetrominoBoard.hpp"
 #include "Tetromino.hpp"
 #include "HumanView.hpp"
+#include "Menu.hpp"
 #include "TitleUI.hpp"
 
 #define NUMBER_PREVIEW_PIECES 3 // Number of pieces to show on side
@@ -33,12 +34,16 @@ public:
     virtual void VShutdown();
     virtual void VRender();
     
-    void DrawBoard();
-    void DrawRectangle(int xPositionPixels, int yPositionPixels, int width, int height, SDL_Color color, bool isFilled=true);
+    void SetGameIsOver();
+    
+    bool m_bGameIsRestarting;
     
 private:
     // Drawing methods
+    void DrawBoard();
+    void DrawRectangle(int xPositionPixels, int yPositionPixels, int width, int height, SDL_Color color, bool isFilled=true);
     void DrawPiece(int x, int y, TetrominoType tetromino, Rotation rotation);
+    void CreateGameOverUI(int screenWidth, int screenHeight, int score);
     
     // Stuff to render
     std::shared_ptr<TetrominoBoard> m_pBoard;
@@ -49,8 +54,10 @@ private:
     // UI/text stuff
     int mPlayerScore;
     std::shared_ptr<TitleUI> m_pScoreUI;
-    std::string mDefaultFontPath;
-    std::vector<TTF_Font*> m_pFonts;
+    std::shared_ptr<MainMenuUI> m_pGameOverUI;
+    std::shared_ptr<TitleUI> m_pGameOverScoreUI;
+    std::shared_ptr<MenuButtonUI> m_pRestartButton;
+    std::shared_ptr<MenuButtonUI> m_pQuitButton;
 };
 
 #endif /* TetrominoView_hpp */

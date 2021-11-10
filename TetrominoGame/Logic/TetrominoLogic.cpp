@@ -21,11 +21,12 @@ TetrominoLogic::TetrominoLogic(GameOptions options)
     m_pGameSessionTimer = NULL;
     m_pTetrominoMovementTimer = NULL;
     
+    mOptions = options;
+    
     m_bIsPaused = false;
     m_bIsGameOver = false;
     m_bHasStashed = false;
     
-    mOptions = options;
     mDropTime = PIECE_DROP_START_TIME;
     mPlayerLevel = 1;
     CVar gPlayerScore = CVar("playerScore", 0, 0, "Player's current score", CVAR_INTEGER);
@@ -105,8 +106,20 @@ void TetrominoLogic::Shutdown()
     m_pGameSessionTimer->Stop();
     m_pTetrominoMovementTimer->Stop();
     mGameCycleTimer->Stop();
+        
+    mGameCycleTimer = NULL;
+    m_pGameSessionTimer = NULL;
+    m_pTetrominoMovementTimer = NULL;
     
-    m_bIsGameOver = true;
+    m_pBoard = NULL;
+    
+    m_bIsPaused = false;
+    m_bIsGameOver = false;
+    m_bHasStashed = false;
+    
+    mDropTime = PIECE_DROP_START_TIME;
+    mPlayerLevel = 1;
+    mPlayerScore = 0;
 }
 
 //
@@ -114,6 +127,20 @@ void TetrominoLogic::Shutdown()
 //
 void TetrominoLogic::OnUpdate(SDL_Event* event)
 {
+    if (m_bIsGameOver)
+    {
+        m_pGameView->VUpdate();
+        OnRender();
+        
+        if (m_pGameView->m_bGameIsRestarting)
+        {
+            Shutdown();
+            Init();
+        }
+        
+        return;
+    }
+    
     switch (event->type) {
         case SDL_QUIT:
             Shutdown();
@@ -230,8 +257,8 @@ void TetrominoLogic::StoreTetrominoAndReset()
     
     if (m_pBoard->IsGameOver())
     {
-        // FIXME: display game over view here (preferably modally)
-        Shutdown();
+        m_bIsGameOver = true;
+        m_pGameView->SetGameIsOver();
         return;
     }
     
@@ -333,14 +360,6 @@ void TetrominoLogic::CreateNewTetromino()
     pNextTetromino->SetY(2 * PIECE_BLOCKS);
     pNextTetromino->SetX(BOARD_WIDTH + 5);
     mNextTetrominos->push_back(pNextTetromino);
-}
-
-//
-// Draws the board
-//
-void TetrominoLogic::DrawBoard()
-{
-    m_pGameView->DrawBoard();
 }
 
 //
