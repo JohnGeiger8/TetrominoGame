@@ -225,7 +225,7 @@ void TetrominoView::DrawRectangle(int xPositionPixels, int yPositionPixels, int 
 // Input: `x` and `y` represent the position the piece is being drawn to.
 //        `tetromino` and `rotation` represent the piece we're drawing.
 //
-void TetrominoView::DrawPiece(int x, int y, TetrominoType tetromino, Rotation rotation)
+void TetrominoView::DrawPiece(int x, int y, TetrominoType tetromino, Rotation rotation, SDL_Color color, bool isFilled)
 {
     for (int boardX = x, tetrominoX = 0; boardX < x + PIECE_BLOCKS; boardX++, tetrominoX++)
     {
@@ -235,10 +235,27 @@ void TetrominoView::DrawPiece(int x, int y, TetrominoType tetromino, Rotation ro
             {
                 int xPositionPixels = m_pBoard->GetXPositionInPixels(boardX);
                 int yPositionPixels = m_pBoard->GetYPositionInPixels(boardY);
-                DrawRectangle(xPositionPixels + 1, yPositionPixels + 1, BLOCK_SIZE - 1, BLOCK_SIZE - 1, Tetrominos::GetTetrominoColor(tetromino));
+                DrawRectangle(xPositionPixels + 1, yPositionPixels + 1, BLOCK_SIZE - 1, BLOCK_SIZE - 1, color, isFilled);
             }
         }
     }
+}
+
+//
+// Draws an outline of the given piece below the given position
+//
+// Input: `x` and `y` represent the position of the piece we're tracing.
+//        `tetromino` and `rotation` represent the piece we're tracing.
+//
+void TetrominoView::DrawPieceOutline(int x, int y, TetrominoType tetromino, Rotation rotation)
+{
+    SDL_Color rectColor = { 0xFF, 0xFF, 0xFF };
+
+    while (m_pBoard->IsPossibleMovement(x, y + 1, tetromino, rotation))
+    {
+        ++y;
+    }
+    DrawPiece(x, y, tetromino, rotation, rectColor, false);
 }
 
 //
@@ -282,19 +299,20 @@ void TetrominoView::VRender()
     SDL_SetRenderDrawColor(g_pRenderer->GetRenderer(), 0x00, 0x00, 0x00, 0x00);
     SDL_RenderClear(g_pRenderer->GetRenderer());
     
-    // Draw Board and pieces
+    // Draw Board and pieces (including preview of where piece is lined up above)
     DrawBoard();
-    DrawPiece(m_pTetromino->GetXPosition(), m_pTetromino->GetYPosition(), m_pTetromino->GetType(), m_pTetromino->GetRotation());
+    DrawPiece(m_pTetromino->GetXPosition(), m_pTetromino->GetYPosition(), m_pTetromino->GetType(), m_pTetromino->GetRotation(), Tetrominos::GetTetrominoColor(m_pTetromino->GetType()));
+    DrawPieceOutline(m_pTetromino->GetXPosition(), m_pTetromino->GetYPosition(), m_pTetromino->GetType(), m_pTetromino->GetRotation());
     
     // Draw next 3 pieces on right side of board
     for (int i = 0; i < NUMBER_PREVIEW_PIECES; ++i)
     {
-        DrawPiece(m_pNextTetrominos->at(i)->GetXPosition(), m_pNextTetrominos->at(i)->GetYPosition(), m_pNextTetrominos->at(i)->GetType(), m_pNextTetrominos->at(i)->GetRotation());
+        DrawPiece(m_pNextTetrominos->at(i)->GetXPosition(), m_pNextTetrominos->at(i)->GetYPosition(), m_pNextTetrominos->at(i)->GetType(), m_pNextTetrominos->at(i)->GetRotation(), Tetrominos::GetTetrominoColor(m_pNextTetrominos->at(i)->GetType()));
     }
     
     // Draw stashed piece on left side of board
     if (m_pStashedTetromino->GetType() != -1)
-        DrawPiece( -PIECE_BLOCKS - 1, 2, m_pStashedTetromino->GetType(), m_pStashedTetromino->GetRotation());
+        DrawPiece( -PIECE_BLOCKS - 1, 2, m_pStashedTetromino->GetType(), m_pStashedTetromino->GetRotation(), Tetrominos::GetTetrominoColor(m_pStashedTetromino->GetType()));
     
     // Draw UI and text elements
     for (ScreenElementPointer &pElement : mScreenElements)

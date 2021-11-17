@@ -41,8 +41,9 @@ public:
 private:
     // Drawing methods
     void DrawBoard();
-    void DrawRectangle(int xPositionPixels, int yPositionPixels, int width, int height, SDL_Color color, bool isFilled=true);
-    void DrawPiece(int x, int y, TetrominoType tetromino, Rotation rotation);
+    void DrawRectangle(int xPositionPixels, int yPositionPixels, int width, int height, SDL_Color color, bool isFilled = true);
+    void DrawPiece(int x, int y, TetrominoType tetromino, Rotation rotation, SDL_Color color, bool isFilled = true);
+    void DrawPieceOutline(int x, int y, TetrominoType tetromino, Rotation rotation);
     void CreateGameOverUI(int screenWidth, int screenHeight, int score);
     
     // Stuff to render
