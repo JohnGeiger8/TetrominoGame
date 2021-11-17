@@ -9,6 +9,7 @@
 #include "TetrominoApp.hpp"
 
 SDLRendererPtr g_pRenderer;
+AudioSystemPtr g_pAudio;
 
 TetrominoApp::TetrominoApp(int screenHeight)
 {
@@ -31,7 +32,10 @@ TetrominoApp::~TetrominoApp()
 {
     m_pGameLogic = NULL;
     m_pMainMenu = NULL;
-    
+    g_pAudio->VShutdown();
+    g_pAudio = NULL;
+
+    Mix_Quit();
     IMG_Quit();
     TTF_Quit();
     
@@ -51,7 +55,7 @@ bool TetrominoApp::InitGame()
     bool successful = true;
     
     // Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
     {
         printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
         successful = false;
@@ -65,7 +69,7 @@ bool TetrominoApp::InitGame()
         successful = false;
     }
     
-    // Initialize Global Renderer
+    // Initialize Globals
     g_pRenderer = std::make_shared<SDLRenderer>(m_pWindow);
     
     // Initialize Font library
@@ -77,9 +81,22 @@ bool TetrominoApp::InitGame()
     
     // Initialize SDL Image with PNG loading
     int imgFlags = IMG_INIT_PNG;
-    if(!(IMG_Init(imgFlags) & imgFlags))
+    if (!(IMG_Init(imgFlags) & imgFlags))
     {
-        printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
+        printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
+        successful = false;
+    }
+    
+    //Initialize SDL_mixer and global audio system
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0)
+    {
+        printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
+        successful = false;
+    }
+    g_pAudio = std::make_shared<SDLMixerAudioSystem>();
+    if (!g_pAudio->VInitialize())
+    {
+        printf("Audio system could not initialize!");
         successful = false;
     }
     

@@ -7,6 +7,8 @@
 
 #include "MainMenuView.hpp"
 #include "CVar.hpp"
+#include "Audio.hpp"
+#include "SoundResourceExtraData.hpp"
 
 MainMenuView::MainMenuView()
 {
@@ -61,6 +63,15 @@ bool MainMenuView::VInit()
     m_pMenu->AddMenuOption(mStartButton);
     m_pMenu->AddMenuOption(mQuitButton);
     VPushElement(m_pMenu);
+    
+    // Play background music
+    Resource resource("Assets/BlockDropperMenuMusic.mp3");
+    std::shared_ptr<SoundResourceExtraData> soundData = std::make_shared<SoundResourceExtraData>();
+    soundData->Initialize(SOUND_TYPE_MP3, false);
+    std::shared_ptr<ResourceHandle> handle = std::make_shared<ResourceHandle>(resource, 0);
+    handle->SetExtra(soundData);
+    IAudioBuffer* music = g_pAudio->VInitAudioBuffer(handle);
+    music->VPlay(1, true);
     
     return successful;
 }

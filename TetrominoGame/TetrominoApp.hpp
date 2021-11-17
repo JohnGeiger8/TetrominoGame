@@ -9,7 +9,9 @@
 #ifndef TetrominoApp_hpp
 #define TetrominoApp_hpp
 
+#include <SDL2_mixer/SDL_mixer.h>
 #include "SDLRenderer.hpp"
+#include "SDLMixerAudioSystem.hpp"
 #include "TetrominoLogic.hpp"
 #include "TetrominoView.hpp"
 #include "MainMenuView.hpp"
