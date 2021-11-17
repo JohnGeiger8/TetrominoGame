@@ -198,16 +198,7 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
             }
             else if (keyStates[SDL_SCANCODE_P])
             {
-                if (mGameCycleTimer->IsPaused())
-                {
-                    mGameCycleTimer->Unpause();
-                    m_bIsPaused = false;
-                }
-                else
-                {
-                    mGameCycleTimer->Pause();
-                    m_bIsPaused = true;
-                }
+                TogglePause();
             }
             OnRender();
             
@@ -360,6 +351,25 @@ void TetrominoLogic::CreateNewTetromino()
     pNextTetromino->SetY(2 * PIECE_BLOCKS);
     pNextTetromino->SetX(BOARD_WIDTH + 5);
     mNextTetrominos->push_back(pNextTetromino);
+}
+
+//
+// Toggles game's pause state
+//
+void TetrominoLogic::TogglePause()
+{
+    if (mGameCycleTimer->IsPaused())
+    {
+        mGameCycleTimer->Unpause();
+        m_bIsPaused = false;
+        g_pAudio->VResumeAllSounds();
+    }
+    else
+    {
+        mGameCycleTimer->Pause();
+        m_bIsPaused = true;
+        g_pAudio->VPauseAllSounds();
+    }
 }
 
 //
