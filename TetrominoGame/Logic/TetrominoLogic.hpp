@@ -14,6 +14,7 @@
 #include "TetrominoBoard.hpp"
 #include "Tetromino.hpp"
 #include "TetrominoView.hpp"
+#include "Audio.hpp"
 #include "Timer.hpp"
 
 #define PIECE_MOVE_TIME 130 // Time until movement events should be run again
@@ -41,6 +42,8 @@ private:
     void StoreTetrominoAndReset();
     void StashTetromino();
     void UpdateScore(int numberDeletedLines);
+    
+    void TogglePause();
 
     std::shared_ptr<TetrominoBoard> m_pBoard;
     std::shared_ptr<TetrominoView> m_pGameView;
