@@ -120,6 +120,7 @@ void TetrominoLogic::Shutdown()
     mDropTime = PIECE_DROP_START_TIME;
     mPlayerLevel = 1;
     mPlayerScore = 0;
+    UpdateGlobalScore(0);
 }
 
 //
@@ -150,53 +151,56 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
                 break;
             
             const Uint8* keyStates = SDL_GetKeyboardState(nullptr);
-            
-            if (keyStates[SDL_SCANCODE_LEFT])
+            if (!m_bIsPaused)
             {
-                if (m_pBoard->IsPossibleMovement(m_pTetromino->GetXPosition() - 1, m_pTetromino->GetYPosition(), m_pTetromino->GetType(), m_pTetromino->GetRotation()))
-                    m_pTetromino->SetX(m_pTetromino->GetXPosition() - 1);
-            }
-            else if (keyStates[SDL_SCANCODE_RIGHT])
-            {
-                if (m_pBoard->IsPossibleMovement(m_pTetromino->GetXPosition() + 1, m_pTetromino->GetYPosition(), m_pTetromino->GetType(), m_pTetromino->GetRotation()))
-                    m_pTetromino->SetX(m_pTetromino->GetXPosition() + 1);
-            }
-            else if (keyStates[SDL_SCANCODE_DOWN])
-            {
-                if (m_pBoard->IsPossibleMovement(m_pTetromino->GetXPosition(), m_pTetromino->GetYPosition() + 1, m_pTetromino->GetType(), m_pTetromino->GetRotation()))
-                    m_pTetromino->SetY(m_pTetromino->GetYPosition() + 1);
-            }
-            else if (keyStates[SDL_SCANCODE_S])
-            {
-                if (!m_bHasStashed)
+                if (keyStates[SDL_SCANCODE_LEFT])
                 {
-                    StashTetromino();
-                    m_bHasStashed = true;
+                    if (m_pBoard->IsPossibleMovement(m_pTetromino->GetXPosition() - 1, m_pTetromino->GetYPosition(), m_pTetromino->GetType(), m_pTetromino->GetRotation()))
+                        m_pTetromino->SetX(m_pTetromino->GetXPosition() - 1);
                 }
-            }
-            else if (keyStates[SDL_SCANCODE_X])
-            {
-                // If the piece already can't go down, the mGameCycleTimer shouldn't reset
-                if (m_pBoard->IsPossibleMovement(m_pTetromino->GetXPosition(), m_pTetromino->GetYPosition() + 1, m_pTetromino->GetType(), m_pTetromino->GetRotation()))
+                else if (keyStates[SDL_SCANCODE_RIGHT])
                 {
-                    // Move piece straight down
-                    while (m_pBoard->IsPossibleMovement(m_pTetromino->GetXPosition(), m_pTetromino->GetYPosition() + 1, m_pTetromino->GetType(), m_pTetromino->GetRotation()))
-                    {
+                    if (m_pBoard->IsPossibleMovement(m_pTetromino->GetXPosition() + 1, m_pTetromino->GetYPosition(), m_pTetromino->GetType(), m_pTetromino->GetRotation()))
+                        m_pTetromino->SetX(m_pTetromino->GetXPosition() + 1);
+                }
+                else if (keyStates[SDL_SCANCODE_DOWN])
+                {
+                    if (m_pBoard->IsPossibleMovement(m_pTetromino->GetXPosition(), m_pTetromino->GetYPosition() + 1, m_pTetromino->GetType(), m_pTetromino->GetRotation()))
                         m_pTetromino->SetY(m_pTetromino->GetYPosition() + 1);
+                }
+                else if (keyStates[SDL_SCANCODE_S])
+                {
+                    if (!m_bHasStashed)
+                    {
+                        StashTetromino();
+                        m_bHasStashed = true;
                     }
-                    
-                    // Restart game cycle to give user a chance to move piece sideways
-                    mGameCycleTimer->Start();
-                    OnRender();
-                    return;
+                }
+                else if (keyStates[SDL_SCANCODE_X])
+                {
+                    // If the piece already can't go down, the mGameCycleTimer shouldn't reset
+                    if (m_pBoard->IsPossibleMovement(m_pTetromino->GetXPosition(), m_pTetromino->GetYPosition() + 1, m_pTetromino->GetType(), m_pTetromino->GetRotation()))
+                    {
+                        // Move piece straight down
+                        while (m_pBoard->IsPossibleMovement(m_pTetromino->GetXPosition(), m_pTetromino->GetYPosition() + 1, m_pTetromino->GetType(), m_pTetromino->GetRotation()))
+                        {
+                            m_pTetromino->SetY(m_pTetromino->GetYPosition() + 1);
+                        }
+                        
+                        // Restart game cycle to give user a chance to move piece sideways
+                        mGameCycleTimer->Start();
+                        OnRender();
+                        return;
+                    }
+                }
+                else if (keyStates[SDL_SCANCODE_Z])
+                {
+                    if (m_pBoard->IsPossibleMovement(m_pTetromino->GetXPosition(), m_pTetromino->GetYPosition(), m_pTetromino->GetType(), (m_pTetromino->GetRotation() + 1) % 4))
+                        m_pTetromino->SetRotation((m_pTetromino->GetRotation() + 1) % 4);
                 }
             }
-            else if (keyStates[SDL_SCANCODE_Z])
-            {
-                if (m_pBoard->IsPossibleMovement(m_pTetromino->GetXPosition(), m_pTetromino->GetYPosition(), m_pTetromino->GetType(), (m_pTetromino->GetRotation() + 1) % 4))
-                    m_pTetromino->SetRotation((m_pTetromino->GetRotation() + 1) % 4);
-            }
-            else if (keyStates[SDL_SCANCODE_P])
+            
+            if (keyStates[SDL_SCANCODE_P])
             {
                 TogglePause();
             }
@@ -205,6 +209,15 @@ void TetrominoLogic::OnUpdate(SDL_Event* event)
             m_pTetrominoMovementTimer->Start();
             
             break;
+    }
+    
+    // If game is paused and view says to resume
+    if (m_bIsPaused && m_pGameView->m_bGameIsResuming)
+    {
+        TogglePause();
+        
+        OnRender();
+        m_pTetrominoMovementTimer->Start();
     }
     
     if (!m_bIsPaused)
@@ -314,10 +327,7 @@ void TetrominoLogic::UpdateScore(int numberDeletedLines)
             mPlayerScore += mPlayerLevel * 1200;
             break;
     }
-    CVar g_playerScore = g_cvars.find("playerScore")->second;
-    g_playerScore.SetIntValue(mPlayerScore);
-    g_cvars.erase("playerScore");
-    g_cvars.insert(pair<std::string, CVar>("playerScore", g_playerScore));
+    UpdateGlobalScore(mPlayerScore);
     
     mTotalNumberLinesDeleted += numberDeletedLines;
     
@@ -327,6 +337,17 @@ void TetrominoLogic::UpdateScore(int numberDeletedLines)
         mPlayerLevel++;
         mDropTime -= 50;
     }
+}
+
+//
+// Update the global score variable
+//
+void TetrominoLogic::UpdateGlobalScore(int score)
+{
+    CVar g_playerScore = g_cvars.find("playerScore")->second;
+    g_playerScore.SetIntValue(score);
+    g_cvars.erase("playerScore");
+    g_cvars.insert(pair<std::string, CVar>("playerScore", g_playerScore));
 }
 
 //
@@ -358,15 +379,17 @@ void TetrominoLogic::CreateNewTetromino()
 //
 void TetrominoLogic::TogglePause()
 {
-    if (mGameCycleTimer->IsPaused())
+    if (m_bIsPaused)
     {
         mGameCycleTimer->Unpause();
+        m_pGameView->UnpauseGame();
         m_bIsPaused = false;
         g_pAudio->VResumeAllSounds();
     }
     else
     {
         mGameCycleTimer->Pause();
+        m_pGameView->PauseGame();
         m_bIsPaused = true;
         g_pAudio->VPauseAllSounds();
     }

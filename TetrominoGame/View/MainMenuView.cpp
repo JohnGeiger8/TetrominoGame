@@ -32,7 +32,9 @@ bool MainMenuView::VInit()
     SDL_Color titleColor = { 0x00, 0xFF, 0xFF };
     std::shared_ptr<TitleUI> pTitleUI = std::make_shared<TitleUI>("BLOCK DROPPER", 36, titleColor);
     mStartButton = std::make_shared<MenuButtonUI>("Start");
+    mStartButton->SetButtonType(START_BUTTON);
     mQuitButton = std::make_shared<MenuButtonUI>("Quit");
+    mQuitButton->SetButtonType(QUIT_BUTTON);
 
     mStartButton->VSetWidth(screenWidth / 3);
     mStartButton->VSetHeight(85);

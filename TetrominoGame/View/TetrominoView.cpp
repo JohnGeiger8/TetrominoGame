@@ -17,6 +17,7 @@ TetrominoView::TetrominoView()
     m_pNextTetrominos = NULL;
     m_pScoreUI = NULL;
     m_pGameOverUI = NULL;
+    m_pPauseUI = NULL;
     m_pGameOverScoreUI = NULL;
     m_pRestartButton = NULL;
     m_pQuitButton = NULL;
@@ -69,7 +70,6 @@ bool TetrominoView::VInit(std::shared_ptr<TetrominoBoard> pBoard, TetrominoPoint
     int screenWidth = g_cvars.find("screenWidth")->second.GetIntValue();
     int playerScore = g_cvars.find("playerScore")->second.GetIntValue();
 
-//    SDL_Rect stashRectangle = { m_pBoard->GetBoardPositionInPixels() - (BOARD_WIDTH / 2) - 140, screenHeight - (BLOCK_SIZE * BOARD_HEIGHT), 100, 100 };
     SDL_Color textColor = { 0x00, 0xFF, 0xFF, 0xFF };
     std::shared_ptr<TitleUI> pTitleUI = std::make_shared<TitleUI>("BLOCK DROPPER", 48, textColor);
     std::shared_ptr<TitleUI> pScoreTextUI = std::make_shared<TitleUI>("Score", 32, textColor);
@@ -86,7 +86,9 @@ bool TetrominoView::VInit(std::shared_ptr<TetrominoBoard> pBoard, TetrominoPoint
     pStashUI->VSetPositionY(screenHeight - (BLOCK_SIZE * BOARD_HEIGHT));
     
     CreateGameOverUI(screenWidth, screenHeight, playerScore);
+    CreatePauseUI(screenWidth, screenHeight, playerScore);
    
+    VPushElement(m_pPauseUI);
     VPushElement(m_pGameOverUI);
     VPushElement(pTitleUI);
     VPushElement(pScoreTextUI);
@@ -94,6 +96,56 @@ bool TetrominoView::VInit(std::shared_ptr<TetrominoBoard> pBoard, TetrominoPoint
     VPushElement(pStashUI);
     
     return success;
+}
+
+//
+// Build Pause Menu UI to be displayed on Pause
+//
+void TetrominoView::CreatePauseUI(int screenWidth, int screenHeight, int score)
+{
+    SDL_Color titleColor = { 0x00, 0xFF, 0xFF };
+    
+    m_pPauseUI = std::make_shared<MainMenuUI>();
+    
+    std::shared_ptr<TitleUI> pTitleUI = std::make_shared<TitleUI>("Paused", 36, titleColor);
+    //m_pGameOverScoreUI = std::make_shared<TitleUI>(std::to_string(mPlayerScore), 28, SDL_Color({0xFF, 0xFF, 0x00}));
+    m_pResumeButton = std::make_shared<MenuButtonUI>("Resume");
+    m_pQuitButton = std::make_shared<MenuButtonUI>("Quit");
+
+    m_pResumeButton->VSetWidth(screenWidth / 3);
+    m_pResumeButton->VSetHeight(85);
+    m_pQuitButton->VSetWidth(screenWidth / 3);
+    m_pQuitButton->VSetHeight(85);
+    
+    m_pPauseUI->VSetPositionX((screenWidth / 2) - (m_pResumeButton->VGetWidth() / 2) - HORIZONTAL_BUTTON_MARGINS);
+    m_pResumeButton->VSetPositionX(m_pPauseUI->VGetPositionX() + HORIZONTAL_BUTTON_MARGINS);
+    m_pQuitButton->VSetPositionX(m_pPauseUI->VGetPositionX() + HORIZONTAL_BUTTON_MARGINS);
+    
+    m_pPauseUI->VSetWidth(m_pResumeButton->VGetWidth() + 2 * HORIZONTAL_BUTTON_MARGINS);
+    m_pPauseUI->VSetHeight(m_pResumeButton->VGetHeight() + m_pQuitButton->VGetHeight() + 3 * VERTICAL_BUTTON_MARGINS);
+    m_pPauseUI->VSetPositionY((screenHeight / 2) - (m_pPauseUI->VGetHeight() / 2));
+    
+    // Title position should be centered because it's text
+    pTitleUI->VSetPositionX(m_pPauseUI->VGetPositionX() + m_pPauseUI->VGetWidth() / 2);
+    pTitleUI->VSetPositionY(m_pPauseUI->VGetPositionY());
+    m_pGameOverScoreUI->VSetPositionX(pTitleUI->VGetPositionX());
+    m_pGameOverScoreUI->VSetPositionY(pTitleUI->VGetPositionY() + VERTICAL_BUTTON_MARGINS);
+
+    m_pResumeButton->VSetPositionY(m_pGameOverScoreUI->VGetPositionY() + m_pGameOverScoreUI->VGetHeight());
+    m_pQuitButton->VSetPositionY(m_pResumeButton->VGetPositionY() + m_pResumeButton->VGetHeight() + VERTICAL_BUTTON_MARGINS);
+
+    // Colors
+    m_pResumeButton->SetButtonColor({0x00, 0xFF, 0xFF});
+    m_pQuitButton->SetButtonColor({0x00, 0xFF, 0xFF});
+    m_pPauseUI->SetColor({0x00, 0xFF, 0xFF, 0xFF});
+    
+    m_pPauseUI->AddMenuOption(pTitleUI);
+    m_pPauseUI->AddMenuOption(m_pGameOverScoreUI);
+    m_pPauseUI->AddMenuOption(m_pResumeButton);
+    m_pPauseUI->AddMenuOption(m_pQuitButton);
+    
+    // Invisible until game ends
+    m_pPauseUI->VSetVisible(false);
 }
 
 //
@@ -170,13 +222,7 @@ void TetrominoView::VShutdown()
 //
 void TetrominoView::VUpdate()
 {
-    int playerScore = g_cvars.find("playerScore")->second.GetIntValue();
-    if (playerScore != mPlayerScore)
-    {
-        m_pScoreUI->VSetTitle(std::to_string(playerScore));
-        m_pGameOverScoreUI->VSetTitle(std::to_string(playerScore));
-        mPlayerScore = playerScore;
-    }
+    UpdateScore();
     
     // Game is over
     if (m_pGameOverUI->VIsVisible())
@@ -187,6 +233,8 @@ void TetrominoView::VUpdate()
         if (m_pRestartButton->VIsSelected())
         {
             m_bGameIsRestarting = true;
+            m_pRestartButton->VSetSelect(false);
+            mPlayerScore = 0;
         }
         
         // Exit the game
@@ -198,6 +246,57 @@ void TetrominoView::VUpdate()
             g_cvars.insert(pair<std::string, CVar>("isQuitting", g_isQuitting));
         }
     }
+    
+    if (m_pPauseUI->VIsVisible())
+    {
+        HumanView::VUpdate();
+        
+        if (m_pResumeButton->VIsSelected())
+        {
+            m_bGameIsResuming = true;
+            m_pResumeButton->VSetSelect(false);
+            m_pPauseUI->VSetVisible(false);
+        }
+        // Exit the game
+        if (m_pQuitButton->VIsSelected())
+        {
+            CVar g_isQuitting = g_cvars.find("isQuitting")->second;
+            g_isQuitting.SetBoolValue(true);
+            g_cvars.erase("isQuitting");
+            g_cvars.insert(pair<std::string, CVar>("isQuitting", g_isQuitting));
+        }
+    }
+}
+
+//
+// Updates the score displayed
+//
+void TetrominoView::UpdateScore()
+{
+    int playerScore = g_cvars.find("playerScore")->second.GetIntValue();
+    if (playerScore != mPlayerScore)
+    {
+        m_pScoreUI->VSetTitle(std::to_string(playerScore));
+        m_pGameOverScoreUI->VSetTitle(std::to_string(playerScore));
+        mPlayerScore = playerScore;
+    }
+}
+
+//
+// Displays Pause Game UI
+//
+void TetrominoView::PauseGame()
+{
+    m_pPauseUI->VSetVisible(true);
+}
+
+//
+// Remove Pause game ui
+//
+void TetrominoView::UnpauseGame()
+{
+    m_bGameIsResuming = false;
+    m_pPauseUI->VSetVisible(false);
 }
 
 //
@@ -326,5 +425,7 @@ void TetrominoView::VRender()
 
 void TetrominoView::SetGameIsOver()
 {
+    m_pRestartButton->VSetSelect(false);
+    m_pQuitButton->VSetSelect(false);
     m_pGameOverUI->VSetVisible(true);
 }

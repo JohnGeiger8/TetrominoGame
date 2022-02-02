@@ -35,8 +35,11 @@ public:
     virtual void VRender();
     
     void SetGameIsOver();
+    void PauseGame();
+    void UnpauseGame();
     
     bool m_bGameIsRestarting;
+    bool m_bGameIsResuming;
     
 private:
     // Drawing methods
@@ -45,6 +48,10 @@ private:
     void DrawPiece(int x, int y, TetrominoType tetromino, Rotation rotation, SDL_Color color, bool isFilled = true);
     void DrawPieceOutline(int x, int y, TetrominoType tetromino, Rotation rotation);
     void CreateGameOverUI(int screenWidth, int screenHeight, int score);
+    void CreatePauseUI(int screenWidth, int screenHeight, int score);
+    
+    // Helper methods
+    void UpdateScore();
     
     // Stuff to render
     std::shared_ptr<TetrominoBoard> m_pBoard;
@@ -56,7 +63,9 @@ private:
     int mPlayerScore;
     std::shared_ptr<TitleUI> m_pScoreUI;
     std::shared_ptr<MainMenuUI> m_pGameOverUI;
+    std::shared_ptr<MainMenuUI> m_pPauseUI;
     std::shared_ptr<TitleUI> m_pGameOverScoreUI;
+    std::shared_ptr<MenuButtonUI> m_pResumeButton;
     std::shared_ptr<MenuButtonUI> m_pRestartButton;
     std::shared_ptr<MenuButtonUI> m_pQuitButton;
 };

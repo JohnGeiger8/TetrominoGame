@@ -42,6 +42,8 @@ private:
     void StoreTetrominoAndReset();
     void StashTetromino();
     void UpdateScore(int numberDeletedLines);
+    void UpdateGlobalScore(int score);
+
     
     void TogglePause();
 

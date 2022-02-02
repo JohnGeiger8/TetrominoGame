@@ -21,13 +21,21 @@
 using UIElementPointer = std::shared_ptr<UIElement>;
 using UIElementVector = std::vector<UIElementPointer>;
 
+enum ButtonType
+{
+    START_BUTTON,
+    RESTART_BUTTON,
+    RESUME_BUTTON,
+    QUIT_BUTTON
+};
+
 //
 // Represents a main menu with a list of options
 //
 class MainMenuUI : public UIElement
 {
     std::shared_ptr<Timer> m_pUserInputTimer;
-    UIElementVector mMenuOptions;
+    UIElementVector mMenuOptions; // FIXME: change to menu buttons?
     SDL_Color mColor;
     int mActiveMenuOption;
     
@@ -54,6 +62,7 @@ public:
 class MenuButtonUI : public UIElement
 {
     std::string mButtonText;
+    ButtonType mButtonType;
     SDL_Color mColor;
     std::shared_ptr<SDLTextTexture> m_pTextTexture;
     
@@ -62,9 +71,11 @@ public:
     ~MenuButtonUI();
     
     void SetButtonText(std::string text) { mButtonText = text; };
+    void SetButtonType(ButtonType type) { mButtonType = type; };
     void SetButtonColor(SDL_Color color) { mColor = color; };
     
     std::string GetButtonText() { return mButtonText; };
+    ButtonType GetButtonType() { return mButtonType; };
     SDL_Color GetColor() { return mColor; };
     
     // IScreenElement implementation
