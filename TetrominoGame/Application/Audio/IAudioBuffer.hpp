@@ -11,6 +11,8 @@
 
 #include "Resource.hpp"
 
+namespace Torti {
+
 class IAudioBuffer
 {
 public:
@@ -32,5 +34,7 @@ public:
     virtual int VGetVolume() const=0;
     //virtual float VGetProgress() const=0;
 };
+
+}
 
 #endif /* IAudioBuffer_hpp */

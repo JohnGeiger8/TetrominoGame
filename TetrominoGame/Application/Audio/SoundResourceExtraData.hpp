@@ -11,6 +11,8 @@
 
 #include "Resource.hpp"
 
+namespace Torti {
+
 enum SoundType
 {
     SOUND_TYPE_FIRST,
@@ -24,9 +26,9 @@ enum SoundType
     SOUND_TYPE_UNKNOWN,
 };
 
-//
-//
-//
+///
+///
+///
 class SoundResourceExtraData : public IResourceExtraData
 {
 public:
@@ -44,6 +46,8 @@ protected:
     bool mIsSoundEffect;              // Is this a sound effect or music?
     bool m_bInitialized;              // Has the sound been initialized
     int mLengthMs;                    // How long the sound is in milliseconds
+};
+
 };
 
 #endif /* SoundResourceExtraData_hpp */

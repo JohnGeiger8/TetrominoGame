@@ -7,6 +7,7 @@
 
 #include "SDLMixerAudioSystem.hpp"
 
+namespace Torti {
 
 bool SDLMixerAudioSystem::VInitialize()
 {
@@ -21,9 +22,9 @@ bool SDLMixerAudioSystem::VInitialize()
     return true;
 }
 
-//
-// Shutdown the SDLMixerAudioSystem
-//
+///
+/// Shutdown the SDLMixerAudioSystem
+///
 void SDLMixerAudioSystem::VShutdown()
 {
     if(m_bInitialized)
@@ -33,9 +34,9 @@ void SDLMixerAudioSystem::VShutdown()
     }
 }
 
-//
-//
-//
+///
+///
+///
 IAudioBuffer* SDLMixerAudioSystem::VInitAudioBuffer(std::shared_ptr<ResourceHandle> handle)
 {
     std::shared_ptr<SoundResourceExtraData> extra = std::static_pointer_cast<SoundResourceExtraData>(handle->GetExtra());
@@ -63,9 +64,9 @@ IAudioBuffer* SDLMixerAudioSystem::VInitAudioBuffer(std::shared_ptr<ResourceHand
     return audioBuffer;
 }
 
-//
-// Stops the buffer and removes it from the list
-//
+///
+/// Stops the buffer and removes it from the list
+///
 void SDLMixerAudioSystem::VReleaseAudioBuffer(IAudioBuffer *audioBuffer)
 {
     audioBuffer->VStop();
@@ -74,9 +75,9 @@ void SDLMixerAudioSystem::VReleaseAudioBuffer(IAudioBuffer *audioBuffer)
 
 
 
-//
-//
-//
+///
+///
+///
 SDLMixerAudioBuffer::SDLMixerAudioBuffer(std::shared_ptr<ResourceHandle> resource)
     : AudioBuffer(resource)
 {
@@ -87,9 +88,9 @@ SDLMixerAudioBuffer::SDLMixerAudioBuffer(std::shared_ptr<ResourceHandle> resourc
     mChannel = -1;
 }
 
-//
-// Deallocate music and chunk
-//
+///
+/// Deallocate music and chunk
+///
 SDLMixerAudioBuffer::~SDLMixerAudioBuffer()
 {
     if (m_pSound)
@@ -112,9 +113,9 @@ bool SDLMixerAudioBuffer::VInit()
         return LoadMusic(extra->GetSoundType());
 }
 
-//
-// Loads SDL Mix sound effect
-//
+///
+/// Loads SDL Mix sound effect
+///
 bool SDLMixerAudioBuffer::LoadSoundEffect(SoundType soundType)
 {
     switch (soundType)
@@ -142,9 +143,9 @@ bool SDLMixerAudioBuffer::LoadSoundEffect(SoundType soundType)
     return true;
 }
 
-//
-// Loads SDL Mix Music
-//
+///
+/// Loads SDL Mix Music
+///
 bool SDLMixerAudioBuffer::LoadMusic(SoundType soundType)
 {
     switch (soundType)
@@ -170,9 +171,9 @@ bool SDLMixerAudioBuffer::LoadMusic(SoundType soundType)
 }
 
 
-//
-// Plays sound stored in buffer
-//
+///
+/// Plays sound stored in buffer
+///
 bool SDLMixerAudioBuffer::VPlay(int volume, bool looping)
 {
     if (!g_pAudio->VActive())
@@ -210,9 +211,9 @@ bool SDLMixerAudioBuffer::VPlay(int volume, bool looping)
     return true;
 }
 
-//
-// Pauses sound stored in buffer
-//
+///
+/// Pauses sound stored in buffer
+///
 bool SDLMixerAudioBuffer::VPause()
 {
     if (!g_pAudio->VActive())
@@ -231,9 +232,9 @@ bool SDLMixerAudioBuffer::VPause()
     return true;
 }
 
-//
-// Stops stored sound
-//
+///
+/// Stops stored sound
+///
 bool SDLMixerAudioBuffer::VStop()
 {
     if (!g_pAudio->VActive())
@@ -252,9 +253,9 @@ bool SDLMixerAudioBuffer::VStop()
     return true;
 }
 
-//
-// Resumes paused sound
-//
+///
+/// Resumes paused sound
+///
 bool SDLMixerAudioBuffer::VResume()
 {
     if (!g_pAudio->VActive())
@@ -273,9 +274,9 @@ bool SDLMixerAudioBuffer::VResume()
     return true;
 }
 
-//
-// Pauses/Unpauses sound
-//
+///
+/// Pauses/Unpauses sound
+///
 bool SDLMixerAudioBuffer::VTogglePause()
 {
     if (!g_pAudio->VActive())
@@ -289,9 +290,9 @@ bool SDLMixerAudioBuffer::VTogglePause()
     return true;
 }
 
-//
-// Returns true if the sound is actively playing
-//
+///
+/// Returns true if the sound is actively playing
+///
 bool SDLMixerAudioBuffer::VIsPlaying()
 {
     if (!g_pAudio->VActive())
@@ -306,9 +307,9 @@ bool SDLMixerAudioBuffer::VIsPlaying()
     return isPlaying;
 }
 
-//
-// Sets volume for sound
-//
+///
+/// Sets volume for sound
+///
 void SDLMixerAudioBuffer::VSetVolume(int volume)
 {
     if (!g_pAudio->VActive())
@@ -321,8 +322,4 @@ void SDLMixerAudioBuffer::VSetVolume(int volume)
         Mix_VolumeMusic(volume * 128);
 }
 
-void SDLMixerAudioBuffer::VSetPosition(unsigned long newPosition)
-{
-    // FIXME: maybe don't need this
 }
-

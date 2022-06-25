@@ -13,6 +13,9 @@
 #include "Audio.hpp"
 #include "AudioBuffer.hpp"
 #include "SoundResourceExtraData.hpp"
+#include "Resource.hpp"
+
+namespace Torti {
 
 class SDLMixerAudioBuffer : public AudioBuffer
 {
@@ -39,7 +42,7 @@ public:
     virtual bool VTogglePause();
     virtual bool VIsPlaying();
     virtual void VSetVolume(int volume);
-    virtual void VSetPosition(unsigned long newPosition);
+//    virtual void VSetPosition(unsigned long newPosition);
 };
 
 
@@ -56,5 +59,7 @@ public:
     virtual void VShutdown();
     virtual bool VInitialize();
 };
+
+}
 
 #endif /* SDLMixerAudioSystem_hpp */

@@ -13,6 +13,8 @@
 #include "IAudioBuffer.hpp"
 #include "Resource.hpp"
 
+namespace Torti {
+
 class IAudio
 {
 public:
@@ -28,5 +30,7 @@ public:
     virtual bool VInitialize()=0;
     virtual void VShutdown()=0;
 };
+
+}
 
 #endif /* IAudio_hpp */

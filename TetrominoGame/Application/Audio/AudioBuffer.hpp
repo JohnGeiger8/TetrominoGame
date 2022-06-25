@@ -9,9 +9,11 @@
 #ifndef AudioBuffer_hpp
 #define AudioBuffer_hpp
 
+#include <memory>
 #include "IAudioBuffer.hpp"
 #include "Resource.hpp"
-#include <memory>
+
+namespace Torti {
 
 class AudioBuffer : public IAudioBuffer
 {
@@ -34,5 +36,7 @@ protected:
         mVolume = 0;
     };
 };
+
+}
 
 #endif /* AudioBuffer_hpp */

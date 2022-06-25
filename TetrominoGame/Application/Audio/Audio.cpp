@@ -7,6 +7,8 @@
 
 #include "Audio.hpp"
 
+namespace Torti {
+
 AudioSystem::AudioSystem()
 {
     
@@ -77,4 +79,6 @@ void AudioSystem::VStopAllSounds()
     }
     
     m_bAllPaused = false;
+}
+
 }

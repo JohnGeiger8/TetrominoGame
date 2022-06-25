@@ -12,6 +12,8 @@
 #include <list>
 #include "IAudio.hpp"
 
+namespace Torti {
+
 class AudioSystem : public IAudio
 {
 public:
@@ -37,5 +39,7 @@ protected:
 
 using AudioSystemPtr = std::shared_ptr<AudioSystem>;
 extern AudioSystemPtr g_pAudio;
+
+}
 
 #endif /* Audio_hpp */
