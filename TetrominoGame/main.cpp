@@ -8,8 +8,6 @@
 #include <iostream>
 #include "TetrominoApp.hpp"
 
-//extern GlobalsMap g_pCvars;
-
 int main(int argc, const char * argv[])
 {
     // Initialize CVars map

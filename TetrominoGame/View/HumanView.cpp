@@ -70,8 +70,6 @@ void HumanView::VRender()
 //
 // Draw text
 //
-// FIXME: how to properly use this? this implementation isn't really right anyway, need to close font somewhere
-//
 void HumanView::VDrawText(std::string text, SDL_Rect* renderRectangle, SDL_Color textColor, int fontSize, std::string fontPath)
 {
     int w, h;

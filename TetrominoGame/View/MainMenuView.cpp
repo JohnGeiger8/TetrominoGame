@@ -105,11 +105,3 @@ void MainMenuView::VUpdate()
     }
 }
 
-
-//
-// Process SDL messages
-//
-void MainMenuView::VProcessMessages(SDL_Event *pEvent)
-{
-    // FIXME: DO I NEED THIS?
-}

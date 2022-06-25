@@ -27,7 +27,7 @@ struct GameOptions
     GameOptions();
 //    ~GameOptions() { delete(m_pDoc); }
 
-    //void Init(const char* xmlFilePath, std::string lpCmdLine); // FIXME: add XML options
+    //void Init(const char* xmlFilePath, std::string lpCmdLine); 
 };
 
 #endif /* Initialization_hpp */

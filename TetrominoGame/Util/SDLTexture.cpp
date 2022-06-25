@@ -58,7 +58,6 @@ bool SDLTexture::VLoadTextureFromFile(std::string path)
     else
     {
         //Color key image
-        // FIXME: this doesn't really make sense
         SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0, 0xFF, 0xFF));
 
         //Create texture from surface pixels
@@ -86,7 +85,6 @@ bool SDLTexture::VLoadTextureFromFile(std::string path)
 void SDLTexture::VSetColor(Uint8 red, Uint8 green, Uint8 blue)
 {
     mColor = { red, green, blue, 0xFF };
-//    SDL_SetTextureColorMod(mTexture, red, green, blue); // FIXME: What is this
 }
 
 //
