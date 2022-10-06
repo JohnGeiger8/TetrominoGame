@@ -25,7 +25,6 @@ public:
     
     virtual bool VInit();
     virtual void VUpdate();
-    virtual void VProcessMessages(SDL_Event* pEvent);
 
 };
 

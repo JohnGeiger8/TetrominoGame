@@ -35,7 +35,7 @@ enum ButtonType
 class MainMenuUI : public UIElement
 {
     std::shared_ptr<Timer> m_pUserInputTimer;
-    UIElementVector mMenuOptions; // FIXME: change to menu buttons?
+    UIElementVector mMenuOptions;
     SDL_Color mColor;
     int mActiveMenuOption;
     

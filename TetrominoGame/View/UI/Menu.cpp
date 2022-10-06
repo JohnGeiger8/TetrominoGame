@@ -142,7 +142,7 @@ void MainMenuUI::VSetVisible(bool visible)
 
 void MainMenuUI::RemoveMenuOption(UIElementPointer screenElement)
 {
-    // FIXME: implement
+    // implement
 }
 
 
